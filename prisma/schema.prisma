@@ -1,0 +1,204 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Énumération des rôles utilisateurs (EMPLOYÉS SEULEMENT)
+enum UserRole {
+  SECRETAIRE
+  MASSOTHERAPEUTE
+  ESTHETICIENNE
+  ADMIN
+}
+
+// Énumération des types de service
+enum ServiceType {
+  MASSOTHERAPIE
+  ESTHETIQUE
+}
+
+// Énumération du genre
+enum Gender {
+  HOMME
+  FEMME
+  AUTRE
+}
+
+// Table des utilisateurs (EMPLOYÉS uniquement - avec authentification)
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  telephone String   @unique
+  password  String   // Hash bcrypt
+  role      UserRole
+  nom       String?
+  prenom    String?
+
+  // Relations
+  notesCreated      Note[]
+  assignedClients   Assignment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([role])
+}
+
+// Table des profils clients (SANS authentification - juste un formulaire)
+model ClientProfile {
+  id String @id @default(cuid())
+
+  // Informations personnelles
+  nom              String
+  prenom           String
+  adresse          String
+  ville            String
+  codePostal       String
+  telMaison        String?
+  telBureau        String?
+  telCellulaire    String   @unique
+  courriel         String   @unique
+  dateNaissance    DateTime
+  occupation       String?
+  gender           Gender
+  serviceType      ServiceType
+  assuranceCouvert Boolean
+
+  // INFORMATIONS MASSOTHÉRAPIE
+  raisonConsultation              String?
+  diagnosticMedical               Boolean?
+  diagnosticMedicalDetails        String?
+  medicaments                     Boolean?
+  medicamentsDetails              String?
+  accidents                       Boolean?
+  accidentsDetails                String?
+  operationsChirurgicales         Boolean?
+  operationsChirurgicalesDetails  String?
+  traitementsActuels              String?
+  problemesCardiaques             Boolean   @default(false)
+  problemesCardiaquesDetails      String?
+  maladiesGraves                  Boolean   @default(false)
+  maladiesGravesDetails           String?
+  ortheses                        Boolean   @default(false)
+  orthesesDetails                 String?
+  allergies                       Boolean   @default(false)
+  allergiesDetails                String?
+
+  // Conditions médicales (massothérapie)
+  raideurs              Boolean @default(false)
+  arthrose              Boolean @default(false)
+  hernieDiscale         Boolean @default(false)
+  oedeme                Boolean @default(false)
+  tendinite             Boolean @default(false)
+  mauxDeTete            Boolean @default(false)
+  flatulence            Boolean @default(false)
+  troublesCirculatoires Boolean @default(false)
+  hypothyroidie         Boolean @default(false)
+  diabete               Boolean @default(false)
+  stresse               Boolean @default(false)
+  premenopause          Boolean @default(false)
+  douleurMusculaire     Boolean @default(false)
+  fibromyalgie          Boolean @default(false)
+  rhumatisme            Boolean @default(false)
+  sciatique             Boolean @default(false)
+  bursite               Boolean @default(false)
+  migraine              Boolean @default(false)
+  diarrhee              Boolean @default(false)
+  phlebite              Boolean @default(false)
+  hypertension          Boolean @default(false)
+  hypoglycemie          Boolean @default(false)
+  burnOut               Boolean @default(false)
+  menopause             Boolean @default(false)
+  inflammationAigue     Boolean @default(false)
+  arteriosclerose       Boolean @default(false)
+  osteoporose           Boolean @default(false)
+  mauxDeDos             Boolean @default(false)
+  fatigueDesJambes      Boolean @default(false)
+  troublesDigestifs     Boolean @default(false)
+  constipation          Boolean @default(false)
+  hyperthyroidie        Boolean @default(false)
+  hypotension           Boolean @default(false)
+  insomnie              Boolean @default(false)
+  depressionNerveuse    Boolean @default(false)
+  autres                String?
+
+  // Zones de douleur (massothérapie)
+  zonesDouleur String[] // Array de strings
+
+  // INFORMATIONS ESTHÉTIQUE
+  etatPeau            String?
+  etatPores           String?
+  coucheCornee        String?
+  irrigationSanguine  String?
+  impuretes           String?
+  sensibiliteCutanee  String?
+  fumeur              String?
+  niveauStress        String?
+  expositionSoleil    String?
+  protectionSolaire   String?
+  suffisanceEau       String?
+  travailExterieur    String?
+  bainChauds          String?
+  routineSoins        String?
+  changementsRecents  String?
+  preferencePeau      String?
+  diagnosticVisuelNotes String?
+
+  // Relations
+  notes       Note[]
+  assignments Assignment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courriel])
+  @@index([telCellulaire])
+  @@index([serviceType])
+  @@index([nom, prenom])
+}
+
+// Table des notes de traitement
+model Note {
+  id      String @id @default(cuid())
+  content String @db.Text
+
+  // Relations
+  clientId String
+  client   ClientProfile @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientId])
+  @@index([authorId])
+  @@index([createdAt])
+}
+
+// Table d'assignation des clients aux professionnels
+model Assignment {
+  id String @id @default(cuid())
+
+  // Relations
+  clientId String
+  client   ClientProfile @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  professionalId String
+  professional   User   @relation(fields: [professionalId], references: [id])
+
+  assignedAt DateTime @default(now())
+
+  // Un client ne peut être assigné qu'une seule fois au même professionnel
+  @@unique([clientId, professionalId])
+  @@index([clientId])
+  @@index([professionalId])
+}
