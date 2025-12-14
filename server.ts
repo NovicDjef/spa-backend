@@ -12,6 +12,8 @@ import clientRoutes from './src/modules/clients/client.routes';
 import noteRoutes from './src/modules/notes/note.routes';
 import assignmentRoutes from './src/modules/assignments/assignment.routes';
 import professionalRoutes from './src/modules/professionals/professional.routes';
+import userRoutes from './src/modules/users/user.routes';
+import marketingRoutes from './src/modules/marketing/marketing.routes';
 
 // Middleware d'erreur
 import { errorHandler } from './src/middleware/errorHandler';
@@ -24,13 +26,26 @@ const PORT = process.env.PORT || 5000;
 // Sécurité
 app.use(helmet());
 
-// CORS
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.ADMIN_URL,
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:3002',
+  'http://192.168.1.86:3000',
+  'http://192.168.1.86:3001',
+  'http://192.168.1.86:3002',
+].filter(Boolean) as string[];
+
+app.use(
+  cors({
+    origin: process.env.NODE_ENV === 'production' ? allowedOrigins : true, // En développement, permet toutes les origines
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
+
 
 // Rate limiting
 const limiter = rateLimit({
@@ -72,6 +87,8 @@ app.use('/api/clients', clientRoutes);
 app.use('/api/notes', noteRoutes);
 app.use('/api/assignments', assignmentRoutes);
 app.use('/api/professionals', professionalRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/marketing', marketingRoutes);
 
 // Route 404
 app.use((req: Request, res: Response) => {
@@ -98,15 +115,15 @@ if (process.env.NODE_ENV !== 'test') {
     🌐 CORS: ${process.env.FRONTEND_URL}
     
     📚 Routes disponibles:
-       → POST   /api/auth/register
        → POST   /api/auth/login
-       → GET    /api/clients
        → POST   /api/clients (public)
-       → GET    /api/clients/:id
-       → GET    /api/notes/:clientId
-       → POST   /api/notes/:clientId
+       → GET    /api/clients
+       → POST   /api/users (admin - créer employé)
+       → GET    /api/users (admin - liste employés)
        → POST   /api/assignments
-       → GET    /api/professionals
+       → POST   /api/notes/:clientId
+       → GET    /api/marketing/contacts (admin - marketing)
+       → POST   /api/marketing/send-email/campaign (admin)
     `);
   });
 }

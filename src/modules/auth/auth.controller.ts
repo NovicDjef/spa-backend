@@ -2,8 +2,8 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
-import prisma from '../config/database';
-import { AppError } from '../middleware/errorHandler';
+import prisma from '../../config/database';
+import { AppError } from '../../middleware/errorHandler';
 
 // Schémas de validation
 const registerSchema = z.object({

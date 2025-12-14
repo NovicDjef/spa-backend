@@ -2,9 +2,9 @@
   "name": "spa-backend",
   "version": "1.0.0",
   "description": "API REST pour le système de gestion de spa",
-  "main": "src/server.ts",
+  "main": "server.ts",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "tsx watch server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",

@@ -121,6 +121,100 @@ export async function sendWelcomeEmail(
 }
 
 /**
+ * Email marketing pour campagnes ADMIN
+ */
+export async function sendMarketingEmail(
+  email: string,
+  prenom: string,
+  subject: string,
+  message: string
+) {
+  const mailOptions = {
+    from: `"Spa Renaissance" <${process.env.SMTP_FROM}>`,
+    to: email,
+    subject: subject,
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+            }
+            .header {
+              background: linear-gradient(135deg, #e24965 0%, #8e67d0 100%);
+              color: white;
+              padding: 30px;
+              text-align: center;
+              border-radius: 10px 10px 0 0;
+            }
+            .content {
+              background: #f9f9f9;
+              padding: 30px;
+              border-radius: 0 0 10px 10px;
+            }
+            .message-content {
+              background: white;
+              padding: 20px;
+              border-left: 4px solid #e24965;
+              margin: 20px 0;
+              white-space: pre-line;
+            }
+            .footer {
+              text-align: center;
+              margin-top: 30px;
+              color: #666;
+              font-size: 12px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>✨ Spa Renaissance</h1>
+            </div>
+            <div class="content">
+              <h2>Bonjour ${prenom},</h2>
+
+              <div class="message-content">
+                ${message}
+              </div>
+
+              <p>Nous espérons vous revoir très bientôt au Spa Renaissance.</p>
+
+              <div style="text-align: center; margin-top: 30px;">
+                <p style="color: #e24965; font-weight: bold;">
+                  Prenez soin de vous !
+                </p>
+              </div>
+            </div>
+            <div class="footer">
+              <p><strong>Spa Renaissance</strong> - Massothérapie & Soins Esthétiques</p>
+              <p>📧 contact@sparenaissance.com | 📞 (514) 123-4567</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Email marketing envoyé à ${email}`);
+  } catch (error) {
+    console.error(`❌ Erreur envoi email marketing à ${email}:`, error);
+    throw error; // Pour les campagnes, on veut tracker les erreurs
+  }
+}
+
+/**
  * Tester la connexion SMTP
  */
 export async function testEmailConnection() {

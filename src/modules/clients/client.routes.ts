@@ -37,12 +37,12 @@ router.get(
 /**
  * @route   PUT /api/clients/:id
  * @desc    Mettre à jour un client
- * @access  Privé (Professionnels uniquement)
+ * @access  Privé (ADMIN uniquement)
  */
 router.put(
   '/:id',
   authenticate,
-  authorize('SECRETAIRE', 'ADMIN'),
+  authorize('ADMIN'),
   asyncHandler(clientController.updateClient)
 );
 

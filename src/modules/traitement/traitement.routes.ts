@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import * as traitementController from '../controllers/traitement.controller';
-import { authenticate, authorize } from '../middleware/auth';
-import { asyncHandler } from '../middleware/errorHandler';
+import * as traitementController from './traitement.controller';
+import { authenticate, authorize } from '../auth/auth';
+import { asyncHandler } from '../../middleware/errorHandler';
 
 const router = Router();
 

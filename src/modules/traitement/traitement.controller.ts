@@ -1,8 +1,8 @@
 import { Response } from 'express';
 import { z } from 'zod';
-import prisma from '../config/database';
-import { AppError } from '../middleware/errorHandler';
-import { AuthRequest } from '../middleware/auth';
+import prisma from '../../config/database';
+import { AppError } from '../../middleware/errorHandler';
+import { AuthRequest } from '../auth/auth';
 
 // Schéma de validation
 const createTraitementSchema = z.object({
