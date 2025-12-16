@@ -8,6 +8,7 @@ import {
   updateUser,
   deleteUser,
   resetPassword,
+  toggleUserStatus,
 } from './user.controller';
 
 const router = Router();
@@ -57,5 +58,12 @@ router.delete('/:id', asyncHandler(deleteUser));
  * @access  ADMIN uniquement
  */
 router.post('/:id/reset-password', asyncHandler(resetPassword));
+
+/**
+ * @route   PATCH /api/users/:id/toggle-status
+ * @desc    Activer/Désactiver un employé
+ * @access  ADMIN uniquement
+ */
+router.patch('/:id/toggle-status', asyncHandler(toggleUserStatus));
 
 export default router;

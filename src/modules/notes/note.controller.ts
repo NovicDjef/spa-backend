@@ -72,12 +72,12 @@ export const createNote = async (req: AuthRequest, res: Response) => {
   // Vérifier que le professionnel a accès à ce client (assigné ou ADMIN/SECRETAIRE)
   const user = req.user!;
   if (user.role === 'MASSOTHERAPEUTE' || user.role === 'ESTHETICIENNE') {
-    const assignment = await prisma.assignment.findUnique({
+    // Utiliser findFirst au lieu de findUnique car la contrainte unique a été supprimée
+    // pour permettre les ré-assignations multiples
+    const assignment = await prisma.assignment.findFirst({
       where: {
-        clientId_professionalId: {
-          clientId,
-          professionalId: user.id,
-        },
+        clientId,
+        professionalId: user.id,
       },
     });
 
@@ -116,7 +116,7 @@ export const createNote = async (req: AuthRequest, res: Response) => {
 /**
  * @desc    Modifier une note
  * @route   PUT /api/notes/:noteId
- * @access  Privé (Professionnels - auteur uniquement)
+ * @access  Privé (Professionnels - auteur uniquement, 24h max sauf ADMIN)
  */
 export const updateNote = async (req: AuthRequest, res: Response) => {
   const { noteId } = req.params;
@@ -135,9 +135,21 @@ export const updateNote = async (req: AuthRequest, res: Response) => {
     throw new AppError('Note non trouvée', 404);
   }
 
-  // Vérifier que l'utilisateur est l'auteur ou ADMIN
-  if (note.authorId !== req.user!.id && req.user!.role !== 'ADMIN') {
+  const user = req.user!;
+
+  // Vérifier que l'utilisateur est l'auteur
+  if (note.authorId !== user.id && user.role !== 'ADMIN') {
     throw new AppError('Vous ne pouvez modifier que vos propres notes', 403);
+  }
+
+  // Vérifier la limite de 24h (sauf pour ADMIN)
+  if (user.role !== 'ADMIN') {
+    const noteAge = Date.now() - new Date(note.createdAt).getTime();
+    const twentyFourHoursInMs = 24 * 60 * 60 * 1000;
+
+    if (noteAge > twentyFourHoursInMs) {
+      throw new AppError('Vous ne pouvez plus modifier cette note (limite de 24h dépassée)', 403);
+    }
   }
 
   // Mettre à jour
@@ -167,7 +179,7 @@ export const updateNote = async (req: AuthRequest, res: Response) => {
 /**
  * @desc    Supprimer une note
  * @route   DELETE /api/notes/:noteId
- * @access  Privé (Professionnels - auteur uniquement)
+ * @access  Privé (Professionnels - auteur uniquement dans les 24h, ADMIN sans limite)
  */
 export const deleteNote = async (req: AuthRequest, res: Response) => {
   const { noteId } = req.params;
@@ -181,8 +193,22 @@ export const deleteNote = async (req: AuthRequest, res: Response) => {
     throw new AppError('Note non trouvée', 404);
   }
 
-  // Vérifier que l'utilisateur est ADMIN (seul l'admin peut supprimer)
-  // Cette vérification est déjà faite par le middleware authorize('ADMIN')
+  const user = req.user!;
+
+  // Vérifier que l'utilisateur est l'auteur ou ADMIN
+  if (note.authorId !== user.id && user.role !== 'ADMIN') {
+    throw new AppError('Vous ne pouvez supprimer que vos propres notes', 403);
+  }
+
+  // Vérifier la limite de 24h (sauf pour ADMIN)
+  if (user.role !== 'ADMIN') {
+    const noteAge = Date.now() - new Date(note.createdAt).getTime();
+    const twentyFourHoursInMs = 24 * 60 * 60 * 1000;
+
+    if (noteAge > twentyFourHoursInMs) {
+      throw new AppError('Vous ne pouvez plus supprimer cette note (limite de 24h dépassée)', 403);
+    }
+  }
 
   // Supprimer
   await prisma.note.delete({

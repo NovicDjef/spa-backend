@@ -359,3 +359,58 @@ export const resetPassword = async (req: AuthRequest, res: Response) => {
     },
   });
 };
+
+/**
+ * @desc    Activer/Désactiver un employé
+ * @route   PATCH /api/users/:id/toggle-status
+ * @access  Privé (ADMIN uniquement)
+ */
+export const toggleUserStatus = async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const { isActive } = req.body;
+
+  if (typeof isActive !== 'boolean') {
+    throw new AppError('Le statut isActive doit être un booléen', 400);
+  }
+
+  // Vérifier que l'employé existe
+  const user = await prisma.user.findUnique({
+    where: { id },
+  });
+
+  if (!user) {
+    throw new AppError('Employé non trouvé', 404);
+  }
+
+  // Empêcher l'admin de se désactiver lui-même
+  if (user.id === req.user!.id) {
+    throw new AppError('Vous ne pouvez pas désactiver votre propre compte', 400);
+  }
+
+  // Empêcher de désactiver un autre ADMIN
+  if (user.role === 'ADMIN' && !isActive) {
+    throw new AppError('Vous ne pouvez pas désactiver un compte administrateur', 400);
+  }
+
+  // Mettre à jour le statut
+  const updatedUser = await prisma.user.update({
+    where: { id },
+    data: { isActive },
+    select: {
+      id: true,
+      email: true,
+      nom: true,
+      prenom: true,
+      role: true,
+      isActive: true,
+    },
+  });
+
+  res.status(200).json({
+    success: true,
+    message: isActive
+      ? `Employé ${updatedUser.nom} ${updatedUser.prenom} activé avec succès`
+      : `Employé ${updatedUser.nom} ${updatedUser.prenom} désactivé avec succès`,
+    data: updatedUser,
+  });
+};

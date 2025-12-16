@@ -5,6 +5,16 @@ import { AppError } from '../../middleware/errorHandler';
 import { AuthRequest } from '../auth/auth';
 import { sendWelcomeEmail } from '../../lib/email';
 
+// Helper pour transformer "OUI"/"NON" en boolean
+const booleanOrString = z.union([
+  z.boolean(),
+  z.string().transform((val) => {
+    if (val === 'OUI' || val === 'oui' || val === 'true') return true;
+    if (val === 'NON' || val === 'non' || val === 'false') return false;
+    return false; // Par défaut
+  }),
+]);
+
 // Schéma de validation pour la création d'un client
 const createClientSchema = z.object({
   // Informations personnelles
@@ -15,70 +25,70 @@ const createClientSchema = z.object({
   codePostal: z.string().min(1, 'Le code postal est requis'),
   telMaison: z.string().optional(),
   telBureau: z.string().optional(),
-  telCellulaire: z.string().min(10, 'Le téléphone cellulaire est requis'),
+  telCellulaire: z.string().min(9, 'Le téléphone cellulaire doit contenir au moins 9 chiffres'),
   courriel: z.string().email('Email invalide'),
   dateNaissance: z.string().min(1, 'La date de naissance est requise'),
   occupation: z.string().optional(),
-  gender: z.enum(['HOMME', 'FEMME']),
+  gender: z.enum(['HOMME', 'FEMME', 'AUTRE']),
   serviceType: z.enum(['MASSOTHERAPIE', 'ESTHETIQUE']),
-  assuranceCouvert: z.boolean().optional(),
+  assuranceCouvert: booleanOrString,
 
   // Informations médicales (optionnelles)
   raisonConsultation: z.string().optional(),
-  diagnosticMedical: z.boolean().optional(),
+  diagnosticMedical: booleanOrString.optional(),
   diagnosticMedicalDetails: z.string().optional(),
-  medicaments: z.boolean().optional(),
+  medicaments: booleanOrString.optional(),
   medicamentsDetails: z.string().optional(),
-  accidents: z.boolean().optional(),
+  accidents: booleanOrString.optional(),
   accidentsDetails: z.string().optional(),
-  operationsChirurgicales: z.boolean().optional(),
+  operationsChirurgicales: booleanOrString.optional(),
   operationsChirurgicalesDetails: z.string().optional(),
   traitementsActuels: z.string().optional(),
-  problemesCardiaques: z.boolean().optional(),
+  problemesCardiaques: booleanOrString.optional(),
   problemesCardiaquesDetails: z.string().optional(),
-  maladiesGraves: z.boolean().optional(),
+  maladiesGraves: booleanOrString.optional(),
   maladiesGravesDetails: z.string().optional(),
-  ortheses: z.boolean().optional(),
+  ortheses: booleanOrString.optional(),
   orthesesDetails: z.string().optional(),
-  allergies: z.boolean().optional(),
+  allergies: booleanOrString.optional(),
   allergiesDetails: z.string().optional(),
 
   // Conditions médicales
-  raideurs: z.boolean().optional(),
-  arthrose: z.boolean().optional(),
-  hernieDiscale: z.boolean().optional(),
-  oedeme: z.boolean().optional(),
-  tendinite: z.boolean().optional(),
-  mauxDeTete: z.boolean().optional(),
-  flatulence: z.boolean().optional(),
-  troublesCirculatoires: z.boolean().optional(),
-  hypothyroidie: z.boolean().optional(),
-  diabete: z.boolean().optional(),
-  stresse: z.boolean().optional(),
-  premenopause: z.boolean().optional(),
-  douleurMusculaire: z.boolean().optional(),
-  fibromyalgie: z.boolean().optional(),
-  rhumatisme: z.boolean().optional(),
-  sciatique: z.boolean().optional(),
-  bursite: z.boolean().optional(),
-  migraine: z.boolean().optional(),
-  diarrhee: z.boolean().optional(),
-  phlebite: z.boolean().optional(),
-  hypertension: z.boolean().optional(),
-  hypoglycemie: z.boolean().optional(),
-  burnOut: z.boolean().optional(),
-  menopause: z.boolean().optional(),
-  inflammationAigue: z.boolean().optional(),
-  arteriosclerose: z.boolean().optional(),
-  osteoporose: z.boolean().optional(),
-  mauxDeDos: z.boolean().optional(),
-  fatigueDesJambes: z.boolean().optional(),
-  troublesDigestifs: z.boolean().optional(),
-  constipation: z.boolean().optional(),
-  hyperthyroidie: z.boolean().optional(),
-  hypotension: z.boolean().optional(),
-  insomnie: z.boolean().optional(),
-  depressionNerveuse: z.boolean().optional(),
+  raideurs: booleanOrString.optional(),
+  arthrose: booleanOrString.optional(),
+  hernieDiscale: booleanOrString.optional(),
+  oedeme: booleanOrString.optional(),
+  tendinite: booleanOrString.optional(),
+  mauxDeTete: booleanOrString.optional(),
+  flatulence: booleanOrString.optional(),
+  troublesCirculatoires: booleanOrString.optional(),
+  hypothyroidie: booleanOrString.optional(),
+  diabete: booleanOrString.optional(),
+  stresse: booleanOrString.optional(),
+  premenopause: booleanOrString.optional(),
+  douleurMusculaire: booleanOrString.optional(),
+  fibromyalgie: booleanOrString.optional(),
+  rhumatisme: booleanOrString.optional(),
+  sciatique: booleanOrString.optional(),
+  bursite: booleanOrString.optional(),
+  migraine: booleanOrString.optional(),
+  diarrhee: booleanOrString.optional(),
+  phlebite: booleanOrString.optional(),
+  hypertension: booleanOrString.optional(),
+  hypoglycemie: booleanOrString.optional(),
+  burnOut: booleanOrString.optional(),
+  menopause: booleanOrString.optional(),
+  inflammationAigue: booleanOrString.optional(),
+  arteriosclerose: booleanOrString.optional(),
+  osteoporose: booleanOrString.optional(),
+  mauxDeDos: booleanOrString.optional(),
+  fatigueDesJambes: booleanOrString.optional(),
+  troublesDigestifs: booleanOrString.optional(),
+  constipation: booleanOrString.optional(),
+  hyperthyroidie: booleanOrString.optional(),
+  hypotension: booleanOrString.optional(),
+  insomnie: booleanOrString.optional(),
+  depressionNerveuse: booleanOrString.optional(),
   autres: z.string().optional(),
 
   // Zones de douleur
@@ -91,13 +101,13 @@ const createClientSchema = z.object({
   irrigationSanguine: z.string().optional(),
   impuretes: z.string().optional(),
   sensibiliteCutanee: z.string().optional(),
-  fumeur: z.boolean().optional(),
+  fumeur: z.enum(['OUI', 'NON', 'OCCASIONNEL',]),
   niveauStress: z.string().optional(),
-  expositionSoleil: z.boolean().optional(),
-  protectionSolaire: z.boolean().optional(),
-  suffisanceEau: z.boolean().optional(),
-  travailExterieur: z.boolean().optional(),
-  bainChauds: z.boolean().optional(),
+  expositionSoleil: z.enum(['RARE', 'MODEREE', 'FREQUENTE', 'TRES_FREQUENTE']),
+  protectionSolaire: z.enum(['TOUJOURS', 'SOUVENT', 'RAREMENT', 'JAMAIS']),
+  suffisanceEau: z.enum(['OUI', 'NON']),
+  travailExterieur: z.enum(['OUI', 'NON']),
+  bainChauds: z.enum(['OUI', 'NON']),
   routineSoins: z.any().optional(),
   changementsRecents: z.any().optional(),
   preferencePeau: z.string().optional(),
@@ -191,47 +201,109 @@ export const getClients = async (req: AuthRequest, res: Response) => {
     where.serviceType = serviceType;
   }
 
-  // Récupérer les clients avec pagination
-  const [clients, total] = await Promise.all([
-    prisma.clientProfile.findMany({
-      where,
+  // SECRET MÉDICAL: SECRETAIRE ne voit QUE les infos d'identification
+  // Les infos médicales restent PRIVÉES entre le client et le professionnel
+  const isSecretaire = user.role === 'SECRETAIRE';
+
+  const selectFields = isSecretaire ? {
+    // SECRETAIRE: SEULEMENT les infos d'identification (pour assigner)
+    id: true,
+    nom: true,
+    prenom: true,
+    telCellulaire: true,
+    courriel: true,
+    serviceType: true,
+    createdAt: true,
+    // AUCUNE info médicale, AUCUNE note, AUCUNE préférence
+  } : undefined; // MASSOTHERAPEUTE/ESTHETICIENNE/ADMIN: TOUT
+
+  const includeRelations = {
+    assignments: {
       include: {
-        notes: {
+        professional: {
           select: {
             id: true,
-            createdAt: true,
-          },
-          orderBy: {
-            createdAt: 'desc',
-          },
-          take: 1,
-        },
-        assignments: {
-          include: {
-            professional: {
-              select: {
-                id: true,
-                nom: true,
-                prenom: true,
-                role: true,
-              },
-            },
+            nom: true,
+            prenom: true,
+            role: true,
           },
         },
       },
       orderBy: {
-        createdAt: 'desc',
+        assignedAt: 'desc' as const,
       },
-      skip,
-      take: limitNum,
+    },
+    // Notes: SECRETAIRE ne les voit PAS
+    ...(isSecretaire ? {} : {
+      notes: {
+        select: {
+          id: true,
+          createdAt: true,
+          authorId: true,
+        },
+        orderBy: {
+          createdAt: 'desc' as const,
+        },
+      },
+    }),
+  };
+
+  // Récupérer les clients avec pagination (sans tri pour l'instant)
+  const [clientsRaw, total] = await Promise.all([
+    prisma.clientProfile.findMany({
+      where,
+      ...(selectFields ? { select: { ...selectFields, ...includeRelations } } : { include: includeRelations }),
     }),
     prisma.clientProfile.count({ where }),
   ]);
 
+  // Pour MASSOTHERAPEUTE/ESTHETICIENNE: Ajouter assignedAt, hasNoteAfterAssignment et trier par date
+  let clients = clientsRaw;
+
+  if (user.role === 'MASSOTHERAPEUTE' || user.role === 'ESTHETICIENNE') {
+    // Enrichir chaque client avec la date de la plus récente assignation à ce professionnel
+    // ET vérifier si une note a été ajoutée après l'assignation
+    clients = clientsRaw.map(client => {
+      const myAssignment = client.assignments.find(
+        assignment => assignment.professionalId === user.id
+      );
+
+      const assignedAt = myAssignment?.assignedAt || client.createdAt;
+
+      // Vérifier si le professionnel a ajouté une note APRÈS la date d'assignation
+      // Cela détermine si le badge "Nouveau RDV" doit être affiché
+      const hasNoteAfterAssignment = (client as any).notes?.some((note: any) => {
+        return (
+          note.authorId === user.id &&
+          new Date(note.createdAt) > new Date(assignedAt)
+        );
+      }) || false;
+
+      return {
+        ...client,
+        assignedAt,
+        hasNoteAfterAssignment, // true = badge caché, false = badge affiché
+      };
+    });
+
+    // Trier par assignedAt DESC (plus récent en premier)
+    clients.sort((a: any, b: any) => {
+      return new Date(b.assignedAt).getTime() - new Date(a.assignedAt).getTime();
+    });
+  } else {
+    // Pour ADMIN/SECRETAIRE: Trier par createdAt DESC
+    clients.sort((a, b) => {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }
+
+  // Appliquer la pagination APRÈS le tri
+  const paginatedClients = clients.slice(skip, skip + limitNum);
+
   res.status(200).json({
     success: true,
     data: {
-      clients,
+      clients: paginatedClients,
       pagination: {
         page: pageNum,
         limit: limitNum,
@@ -250,6 +322,11 @@ export const getClients = async (req: AuthRequest, res: Response) => {
 export const getClientById = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   const user = req.user!;
+
+  // SECRET MEDICAL: La SECRETAIRE ne peut PAS consulter les dossiers clients (notes médicales)
+  if (user.role === 'SECRETAIRE') {
+    throw new AppError('Accès refusé. Le secret médical vous empêche de consulter les dossiers clients.', 403);
+  }
 
   const client = await prisma.clientProfile.findUnique({
     where: { id },
@@ -301,7 +378,7 @@ export const getClientById = async (req: AuthRequest, res: Response) => {
       throw new AppError('Vous n\'avez pas accès à ce dossier client', 403);
     }
   }
-  // SECRETAIRE/ADMIN: Accès total (pas de restriction)
+  // ADMIN: Accès total
 
   res.status(200).json({
     success: true,
@@ -373,6 +450,21 @@ export const deleteClient = async (req: AuthRequest, res: Response) => {
  */
 export const searchClients = async (req: AuthRequest, res: Response) => {
   const { query } = req.params;
+  const user = req.user!;
+
+  // SECRET MÉDICAL: SECRETAIRE ne voit QUE les infos d'identification
+  const isSecretaire = user.role === 'SECRETAIRE';
+
+  const selectFields = isSecretaire ? {
+    // SECRETAIRE: SEULEMENT les infos d'identification
+    id: true,
+    nom: true,
+    prenom: true,
+    telCellulaire: true,
+    courriel: true,
+    serviceType: true,
+    createdAt: true,
+  } : undefined; // MASSOTHERAPEUTE/ESTHETICIENNE/ADMIN: TOUT
 
   const clients = await prisma.clientProfile.findMany({
     where: {
@@ -380,19 +472,10 @@ export const searchClients = async (req: AuthRequest, res: Response) => {
         { nom: { contains: query, mode: 'insensitive' } },
         { prenom: { contains: query, mode: 'insensitive' } },
         { telCellulaire: { contains: query } },
-        { adresse: { contains: query, mode: 'insensitive' } },
         { courriel: { contains: query, mode: 'insensitive' } },
       ],
     },
-    include: {
-      user: {
-        select: {
-          id: true,
-          email: true,
-          telephone: true,
-        },
-      },
-    },
+    ...(selectFields ? { select: selectFields } : {}),
     take: 20,
     orderBy: {
       createdAt: 'desc',

@@ -65,19 +65,14 @@ export const assignClient = async (req: AuthRequest, res: Response) => {
     );
   }
 
-  // Créer l'assignation (ou la récupérer si elle existe déjà)
-  const assignment = await prisma.assignment.upsert({
-    where: {
-      clientId_professionalId: {
-        clientId: validatedData.clientId,
-        professionalId: validatedData.professionalId,
-      },
-    },
-    create: {
+  // Créer une NOUVELLE assignation (permet les ré-assignations)
+  // Chaque assignation crée un nouvel enregistrement avec une nouvelle date assignedAt
+  // Cela permet au professionnel de voir les "nouveaux rendez-vous" en haut de sa liste
+  const assignment = await prisma.assignment.create({
+    data: {
       clientId: validatedData.clientId,
       professionalId: validatedData.professionalId,
     },
-    update: {},
     include: {
       client: {
         select: {
@@ -107,34 +102,34 @@ export const assignClient = async (req: AuthRequest, res: Response) => {
 };
 
 /**
- * @desc    Supprimer une assignation
+ * @desc    Supprimer la plus récente assignation d'un client à un professionnel
  * @route   DELETE /api/assignments/:clientId/:professionalId
  * @access  Privé (SECRETAIRE, ADMIN uniquement)
+ * @note    Supprime uniquement la plus récente assignation. Pour supprimer toutes les assignations,
+ *          appelez cette route plusieurs fois ou utilisez DELETE /api/assignments/all/:clientId/:professionalId
  */
 export const removeAssignment = async (req: AuthRequest, res: Response) => {
   const { clientId, professionalId } = req.params;
 
-  // Vérifier que l'assignation existe
-  const assignment = await prisma.assignment.findUnique({
+  // Trouver la plus récente assignation pour ce client-professionnel
+  const assignment = await prisma.assignment.findFirst({
     where: {
-      clientId_professionalId: {
-        clientId,
-        professionalId,
-      },
+      clientId,
+      professionalId,
+    },
+    orderBy: {
+      assignedAt: 'desc',
     },
   });
 
   if (!assignment) {
-    throw new AppError('Assignation non trouvée', 404);
+    throw new AppError('Aucune assignation trouvée pour ce client et ce professionnel', 404);
   }
 
-  // Supprimer l'assignation
+  // Supprimer cette assignation spécifique
   await prisma.assignment.delete({
     where: {
-      clientId_professionalId: {
-        clientId,
-        professionalId,
-      },
+      id: assignment.id,
     },
   });
 

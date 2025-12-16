@@ -44,11 +44,17 @@ export const authenticate = async (
         id: true,
         email: true,
         role: true,
+        isActive: true,
       },
     });
 
     if (!user) {
       throw new AppError('Utilisateur non trouvé', 401);
+    }
+
+    // Vérifier que l'employé est actif (sauf pour les ADMIN)
+    if (!user.isActive && user.role !== 'ADMIN') {
+      throw new AppError('Votre compte a été désactivé. Contactez un administrateur.', 403);
     }
 
     // Attacher l'utilisateur à la requête

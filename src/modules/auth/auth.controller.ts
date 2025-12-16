@@ -123,6 +123,11 @@ export const login = async (req: Request, res: Response) => {
     throw new AppError('Email ou mot de passe incorrect', 401);
   }
 
+  // Vérifier que le compte est actif (sauf pour les ADMIN)
+  if (!user.isActive && user.role !== 'ADMIN') {
+    throw new AppError('Votre compte a été désactivé. Contactez un administrateur.', 403);
+  }
+
   // Générer le token
   const token = generateToken(user.id, user.email, user.role);
 
