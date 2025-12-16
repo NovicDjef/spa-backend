@@ -15,55 +15,68 @@ const router = Router();
 
 // Toutes les routes nécessitent l'authentification ET le rôle ADMIN
 router.use(authenticate);
-router.use(authorize('ADMIN'));
 
 /**
  * @route   POST /api/users
  * @desc    Créer un employé
  * @access  ADMIN uniquement
  */
-router.post('/', asyncHandler(createUser));
+router.post('/',
+  authorize('ADMIN'),
+  asyncHandler(createUser));
 
 /**
  * @route   GET /api/users
  * @desc    Récupérer tous les employés
- * @access  ADMIN uniquement
+ * @access  ADMIN et SECRETAIRE uniquement
  */
-router.get('/', asyncHandler(getAllUsers));
+router.get('/', 
+  authorize('ADMIN', 'SECRETAIRE'),
+  asyncHandler(getAllUsers));
 
 /**
  * @route   GET /api/users/:id
  * @desc    Récupérer un employé par ID
  * @access  ADMIN uniquement
  */
-router.get('/:id', asyncHandler(getUserById));
+router.get('/:id', 
+  authorize('ADMIN'),
+  asyncHandler(getUserById));
 
 /**
  * @route   PUT /api/users/:id
  * @desc    Mettre à jour un employé
  * @access  ADMIN uniquement
  */
-router.put('/:id', asyncHandler(updateUser));
+router.put('/:id', 
+  authorize('ADMIN'),
+  asyncHandler(updateUser));
 
 /**
  * @route   DELETE /api/users/:id
  * @desc    Supprimer un employé
  * @access  ADMIN uniquement
  */
-router.delete('/:id', asyncHandler(deleteUser));
+router.delete('/:id', 
+  authorize('ADMIN'),
+  asyncHandler(deleteUser));
 
 /**
  * @route   POST /api/users/:id/reset-password
  * @desc    Réinitialiser le mot de passe d'un employé
  * @access  ADMIN uniquement
  */
-router.post('/:id/reset-password', asyncHandler(resetPassword));
+router.post('/:id/reset-password', 
+  authorize('ADMIN'),
+  asyncHandler(resetPassword));
 
 /**
  * @route   PATCH /api/users/:id/toggle-status
  * @desc    Activer/Désactiver un employé
  * @access  ADMIN uniquement
  */
-router.patch('/:id/toggle-status', asyncHandler(toggleUserStatus));
+router.patch('/:id/toggle-status', 
+  authorize('ADMIN'),
+  asyncHandler(toggleUserStatus));
 
 export default router;
