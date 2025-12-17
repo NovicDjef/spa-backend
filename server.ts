@@ -32,6 +32,7 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:3002',
+  'https://dospa.novic.dev',
   'http://192.168.1.86:3000',
   'http://192.168.1.86:3001',
   'http://192.168.1.86:3002',
