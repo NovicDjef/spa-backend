@@ -4,8 +4,8 @@
   "description": "API REST pour le système de gestion de spa",
   "main": "server.ts",
   "scripts": {
-    "dev": "tsx server.ts",
-    "watch": "tsx watch server.ts",
+    "dev": "tsx src/server.ts",
+    "watch": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",

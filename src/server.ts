@@ -7,16 +7,16 @@ import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 
 // Routes
-import authRoutes from './src/modules/auth/auth.routes';
-import clientRoutes from './src/modules/clients/client.routes';
-import noteRoutes from './src/modules/notes/note.routes';
-import assignmentRoutes from './src/modules/assignments/assignment.routes';
-import professionalRoutes from './src/modules/professionals/professional.routes';
-import userRoutes from './src/modules/users/user.routes';
-import marketingRoutes from './src/modules/marketing/marketing.routes';
+import authRoutes from './modules/auth/auth.routes';
+import clientRoutes from './modules/clients/client.routes';
+import noteRoutes from './modules/notes/note.routes';
+import assignmentRoutes from './modules/assignments/assignment.routes';
+import professionalRoutes from './modules/professionals/professional.routes';
+import userRoutes from './modules/users/user.routes';
+import marketingRoutes from './modules/marketing/marketing.routes';
 
 // Middleware d'erreur
-import { errorHandler } from './src/middleware/errorHandler';
+import { errorHandler } from './middleware/errorHandler';
 
 dotenv.config();
 
