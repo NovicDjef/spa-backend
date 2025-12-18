@@ -72,6 +72,8 @@ model ClientProfile {
   gender           Gender
   serviceType      ServiceType
   assuranceCouvert Boolean
+  autreMaladie     Boolean
+  autreMaladieDetails String?
 
   // INFORMATIONS MASSOTHÉRAPIE
   raisonConsultation              String?

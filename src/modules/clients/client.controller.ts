@@ -111,6 +111,8 @@ const createClientSchema = z.object({
   irrigationSanguine: z.string().optional(),
   impuretes: z.string().optional(),
   sensibiliteCutanee: z.string().optional(),
+  autreMaladieDetails: z.string().nullable().optional(),
+  autreMaladie: z.boolean().optional(),
   fumeur: z.enum(['OUI', 'NON', 'OCCASIONNEL',]).nullable().optional(),
   niveauStress: z.string().optional(),
   expositionSoleil: z.enum(['RARE', 'MODEREE', 'FREQUENTE', 'TRES_FREQUENTE']) .optional().nullable(),
