@@ -13,6 +13,7 @@ const createUserSchema = z.object({
   role: z.enum(['SECRETAIRE', 'MASSOTHERAPEUTE', 'ESTHETICIENNE', 'ADMIN']),
   nom: z.string().min(1, 'Le nom est requis'),
   prenom: z.string().min(1, 'Le prénom est requis'),
+  isActive: z.boolean().default(true),
 });
 
 /**

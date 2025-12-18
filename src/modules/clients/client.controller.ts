@@ -6,14 +6,24 @@ import { AuthRequest } from '../auth/auth';
 import { sendWelcomeEmail } from '../../lib/email';
 
 // Helper pour transformer "OUI"/"NON" en boolean
-const booleanOrString = z.union([
-  z.boolean(),
-  z.string().transform((val) => {
-    if (val === 'OUI' || val === 'oui' || val === 'true') return true;
-    if (val === 'NON' || val === 'non' || val === 'false') return false;
-    return false; // Par défaut
-  }),
-]);
+const booleanOrString = z
+  .union([
+    z.boolean(),
+    z.enum(['OUI', 'NON', 'oui', 'non', 'true', 'false']),
+  ])
+  .transform((val) => {
+    if (val === true || val === 'OUI' || val === 'oui' || val === 'true') {
+      return true;
+    }
+    if (val === false || val === 'NON' || val === 'non' || val === 'false') {
+      return false;
+    }
+    return val;
+  })
+  .nullable()
+  .optional();
+
+
 
 // Schéma de validation pour la création d'un client
 const createClientSchema = z.object({
@@ -34,24 +44,24 @@ const createClientSchema = z.object({
   assuranceCouvert: booleanOrString,
 
   // Informations médicales (optionnelles)
-  raisonConsultation: z.string().optional(),
+  raisonConsultation: z.string().nullable().optional(),
   diagnosticMedical: booleanOrString.optional(),
-  diagnosticMedicalDetails: z.string().optional(),
+  diagnosticMedicalDetails: z.string().nullable().optional(),
   medicaments: booleanOrString.optional(),
-  medicamentsDetails: z.string().optional(),
+  medicamentsDetails: z.string().nullable().optional(),
   accidents: booleanOrString.optional(),
-  accidentsDetails: z.string().optional(),
+  accidentsDetails: z.string().nullable().optional(),
   operationsChirurgicales: booleanOrString.optional(),
   operationsChirurgicalesDetails: z.string().optional(),
   traitementsActuels: z.string().optional(),
-  problemesCardiaques: booleanOrString.optional(),
-  problemesCardiaquesDetails: z.string().optional(),
+  problemesCardiaques: z.boolean().optional(),
+  problemesCardiaquesDetails: z.string().nullable().optional(),
   maladiesGraves: booleanOrString.optional(),
-  maladiesGravesDetails: z.string().optional(),
+  maladiesGravesDetails: z.string().nullable().optional(),
   ortheses: booleanOrString.optional(),
-  orthesesDetails: z.string().optional(),
+  orthesesDetails: z.string().nullable().optional(),
   allergies: booleanOrString.optional(),
-  allergiesDetails: z.string().optional(),
+  allergiesDetails: z.string().nullable().optional(),
 
   // Conditions médicales
   raideurs: booleanOrString.optional(),
@@ -101,13 +111,13 @@ const createClientSchema = z.object({
   irrigationSanguine: z.string().optional(),
   impuretes: z.string().optional(),
   sensibiliteCutanee: z.string().optional(),
-  fumeur: z.enum(['OUI', 'NON', 'OCCASIONNEL',]),
+  fumeur: z.enum(['OUI', 'NON', 'OCCASIONNEL',]).nullable().optional(),
   niveauStress: z.string().optional(),
-  expositionSoleil: z.enum(['RARE', 'MODEREE', 'FREQUENTE', 'TRES_FREQUENTE']),
-  protectionSolaire: z.enum(['TOUJOURS', 'SOUVENT', 'RAREMENT', 'JAMAIS']),
-  suffisanceEau: z.enum(['OUI', 'NON']),
-  travailExterieur: z.enum(['OUI', 'NON']),
-  bainChauds: z.enum(['OUI', 'NON']),
+  expositionSoleil: z.enum(['RARE', 'MODEREE', 'FREQUENTE', 'TRES_FREQUENTE']) .optional().nullable(),
+  protectionSolaire: z.enum(['TOUJOURS', 'SOUVENT', 'RAREMENT', 'JAMAIS']).optional().nullable(),
+  suffisanceEau: z.enum(['OUI', 'NON']) .optional().nullable(),
+  travailExterieur: z.enum(['OUI', 'NON']) .optional().nullable(),
+  bainChauds: z.enum(['OUI', 'NON']) .optional().nullable(),
   routineSoins: z.any().optional(),
   changementsRecents: z.any().optional(),
   preferencePeau: z.string().optional(),
@@ -142,13 +152,14 @@ export const createClient = async (req: Request, res: Response) => {
   }
 
   // Créer le profil client directement (SANS User)
-  const client = await prisma.clientProfile.create({
-    data: {
-      ...validatedData,
-      dateNaissance: new Date(validatedData.dateNaissance),
-      zonesDouleur: validatedData.zonesDouleur || [],
-    },
-  });
+const client = await prisma.clientProfile.create({
+  data: {
+    ...validatedData,
+    dateNaissance: new Date(validatedData.dateNaissance),
+    zonesDouleur: validatedData.zonesDouleur ?? [],
+  },
+});
+
 
   // Envoyer l'email de confirmation (async, ne bloque pas la réponse)
   sendWelcomeEmail(client.courriel, client.prenom, client.serviceType);
