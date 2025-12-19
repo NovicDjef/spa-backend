@@ -57,6 +57,7 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 app.use('/api/', limiter);
+app.set('trust proxy', 1);
 
 // Parsing
 app.use(express.json({ limit: '10mb' }));
