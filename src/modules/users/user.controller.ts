@@ -373,11 +373,6 @@ export const resetPassword = async (req: AuthRequest, res: Response) => {
  */
 export const toggleUserStatus = async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
-  const { isActive } = req.body;
-
-  if (typeof isActive !== 'boolean') {
-    throw new AppError('Le statut isActive doit être un booléen', 400);
-  }
 
   // Vérifier que l'employé existe
   const user = await prisma.user.findUnique({
@@ -394,14 +389,14 @@ export const toggleUserStatus = async (req: AuthRequest, res: Response) => {
   }
 
   // Empêcher de désactiver un autre ADMIN
-  if (user.role === 'ADMIN' && !isActive) {
+  if (user.role === 'ADMIN' && user.isActive) {
     throw new AppError('Vous ne pouvez pas désactiver un compte administrateur', 400);
   }
 
-  // Mettre à jour le statut
+  // Inverser le statut
   const updatedUser = await prisma.user.update({
     where: { id },
-    data: { isActive },
+    data: { isActive: !user.isActive },
     select: {
       id: true,
       email: true,
@@ -414,7 +409,7 @@ export const toggleUserStatus = async (req: AuthRequest, res: Response) => {
 
   res.status(200).json({
     success: true,
-    message: isActive
+    message: updatedUser.isActive
       ? `Employé ${updatedUser.nom} ${updatedUser.prenom} activé avec succès`
       : `Employé ${updatedUser.nom} ${updatedUser.prenom} désactivé avec succès`,
     data: updatedUser,
