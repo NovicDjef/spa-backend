@@ -55,6 +55,7 @@ export const createUser = async (req: AuthRequest, res: Response) => {
       role: validatedData.role,
       nom: validatedData.nom,
       prenom: validatedData.prenom,
+      isActive: true,
     },
     select: {
       id: true,
@@ -63,6 +64,7 @@ export const createUser = async (req: AuthRequest, res: Response) => {
       nom: true,
       prenom: true,
       role: true,
+      isActive: true,
       createdAt: true,
     },
   });
@@ -113,6 +115,7 @@ export const getAllUsers = async (req: AuthRequest, res: Response) => {
       nom: true,
       prenom: true,
       role: true,
+      isActive: true,
       createdAt: true,
       _count: {
         select: {
@@ -150,6 +153,7 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
       nom: true,
       prenom: true,
       role: true,
+      isActive: true,
       createdAt: true,
       updatedAt: true,
       assignedClients: {
@@ -268,6 +272,7 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
       nom: true,
       prenom: true,
       role: true,
+      isActive: true,
       updatedAt: true,
     },
   });
