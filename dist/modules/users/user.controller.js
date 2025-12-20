@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.toggleUserStatus = exports.resetPassword = exports.deleteUser = exports.updateUser = exports.getUserById = exports.getAllUsers = exports.createUser = void 0;
+exports.getUserReviews = exports.toggleUserStatus = exports.resetPassword = exports.deleteUser = exports.updateUser = exports.getUserById = exports.getAllUsers = exports.createUser = void 0;
 const zod_1 = require("zod");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const database_1 = __importDefault(require("../../config/database"));
@@ -16,6 +16,7 @@ const createUserSchema = zod_1.z.object({
     role: zod_1.z.enum(['SECRETAIRE', 'MASSOTHERAPEUTE', 'ESTHETICIENNE', 'ADMIN']),
     nom: zod_1.z.string().min(1, 'Le nom est requis'),
     prenom: zod_1.z.string().min(1, 'Le prénom est requis'),
+    isActive: zod_1.z.boolean().default(true),
 });
 /**
  * @desc    Créer un employé (par l'admin)
@@ -50,6 +51,7 @@ const createUser = async (req, res) => {
             role: validatedData.role,
             nom: validatedData.nom,
             prenom: validatedData.prenom,
+            isActive: true,
         },
         select: {
             id: true,
@@ -58,6 +60,7 @@ const createUser = async (req, res) => {
             nom: true,
             prenom: true,
             role: true,
+            isActive: true,
             createdAt: true,
         },
     });
@@ -96,29 +99,49 @@ const getAllUsers = async (req, res) => {
     }
     const users = await database_1.default.user.findMany({
         where,
-        select: {
-            id: true,
-            email: true,
-            telephone: true,
-            nom: true,
-            prenom: true,
-            role: true,
-            createdAt: true,
+        include: {
             _count: {
                 select: {
                     assignedClients: true,
                     notesCreated: true,
+                    reviewsReceived: true,
                 },
             },
+            reviewsReceived: {
+                select: { rating: true }
+            }
         },
         orderBy: [
             { role: 'asc' },
             { nom: 'asc' },
         ],
     });
+    // Calculer la moyenne pour chaque user
+    const usersWithStats = users.map(user => {
+        const reviewsCount = user.reviewsReceived.length;
+        const averageRating = reviewsCount > 0
+            ? user.reviewsReceived.reduce((sum, r) => sum + r.rating, 0) / reviewsCount
+            : null;
+        return {
+            id: user.id,
+            email: user.email,
+            telephone: user.telephone,
+            nom: user.nom,
+            prenom: user.prenom,
+            role: user.role,
+            isActive: user.isActive,
+            createdAt: user.createdAt,
+            _count: {
+                assignedClients: user._count.assignedClients,
+                notesCreated: user._count.notesCreated,
+                reviewsReceived: user._count.reviewsReceived
+            },
+            averageRating: averageRating ? Math.round(averageRating * 10) / 10 : null
+        };
+    });
     res.status(200).json({
         success: true,
-        data: users,
+        data: usersWithStats,
     });
 };
 exports.getAllUsers = getAllUsers;
@@ -138,6 +161,7 @@ const getUserById = async (req, res) => {
             nom: true,
             prenom: true,
             role: true,
+            isActive: true,
             createdAt: true,
             updatedAt: true,
             assignedClients: {
@@ -245,6 +269,7 @@ const updateUser = async (req, res) => {
             nom: true,
             prenom: true,
             role: true,
+            isActive: true,
             updatedAt: true,
         },
     });
@@ -331,10 +356,6 @@ exports.resetPassword = resetPassword;
  */
 const toggleUserStatus = async (req, res) => {
     const { id } = req.params;
-    const { isActive } = req.body;
-    if (typeof isActive !== 'boolean') {
-        throw new errorHandler_1.AppError('Le statut isActive doit être un booléen', 400);
-    }
     // Vérifier que l'employé existe
     const user = await database_1.default.user.findUnique({
         where: { id },
@@ -347,13 +368,13 @@ const toggleUserStatus = async (req, res) => {
         throw new errorHandler_1.AppError('Vous ne pouvez pas désactiver votre propre compte', 400);
     }
     // Empêcher de désactiver un autre ADMIN
-    if (user.role === 'ADMIN' && !isActive) {
+    if (user.role === 'ADMIN' && user.isActive) {
         throw new errorHandler_1.AppError('Vous ne pouvez pas désactiver un compte administrateur', 400);
     }
-    // Mettre à jour le statut
+    // Inverser le statut
     const updatedUser = await database_1.default.user.update({
         where: { id },
-        data: { isActive },
+        data: { isActive: !user.isActive },
         select: {
             id: true,
             email: true,
@@ -365,11 +386,78 @@ const toggleUserStatus = async (req, res) => {
     });
     res.status(200).json({
         success: true,
-        message: isActive
+        message: updatedUser.isActive
             ? `Employé ${updatedUser.nom} ${updatedUser.prenom} activé avec succès`
             : `Employé ${updatedUser.nom} ${updatedUser.prenom} désactivé avec succès`,
         data: updatedUser,
     });
 };
 exports.toggleUserStatus = toggleUserStatus;
+/**
+ * @desc    Récupérer les avis détaillés d'un employé
+ * @route   GET /api/users/:id/reviews
+ * @access  Privé (ADMIN uniquement)
+ */
+const getUserReviews = async (req, res) => {
+    // Vérifier admin
+    if (req.user.role !== 'ADMIN') {
+        return res.status(403).json({
+            success: false,
+            message: 'Accès interdit'
+        });
+    }
+    const { id } = req.params;
+    const user = await database_1.default.user.findUnique({
+        where: { id },
+        select: {
+            id: true,
+            nom: true,
+            prenom: true
+        }
+    });
+    if (!user) {
+        return res.status(404).json({
+            success: false,
+            message: 'Utilisateur introuvable'
+        });
+    }
+    const reviews = await database_1.default.review.findMany({
+        where: { professionalId: id },
+        select: {
+            id: true,
+            rating: true,
+            comment: true,
+            createdAt: true
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 50
+    });
+    const totalReviews = reviews.length;
+    const averageRating = totalReviews > 0
+        ? reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews
+        : 0;
+    const ratingDistribution = {
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0
+    };
+    reviews.forEach(review => {
+        ratingDistribution[review.rating]++;
+    });
+    return res.json({
+        success: true,
+        data: {
+            user,
+            statistics: {
+                averageRating: Math.round(averageRating * 10) / 10,
+                totalReviews,
+                ratingDistribution
+            },
+            recentReviews: reviews
+        }
+    });
+};
+exports.getUserReviews = getUserReviews;
 //# sourceMappingURL=user.controller.js.map

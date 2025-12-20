@@ -9,16 +9,22 @@ const database_1 = __importDefault(require("../../config/database"));
 const errorHandler_1 = require("../../middleware/errorHandler");
 const email_1 = require("../../lib/email");
 // Helper pour transformer "OUI"/"NON" en boolean
-const booleanOrString = zod_1.z.union([
+const booleanOrString = zod_1.z
+    .union([
     zod_1.z.boolean(),
-    zod_1.z.string().transform((val) => {
-        if (val === 'OUI' || val === 'oui' || val === 'true')
-            return true;
-        if (val === 'NON' || val === 'non' || val === 'false')
-            return false;
-        return false; // Par défaut
-    }),
-]);
+    zod_1.z.enum(['OUI', 'NON', 'oui', 'non', 'true', 'false']),
+])
+    .transform((val) => {
+    if (val === true || val === 'OUI' || val === 'oui' || val === 'true') {
+        return true;
+    }
+    if (val === false || val === 'NON' || val === 'non' || val === 'false') {
+        return false;
+    }
+    return val;
+})
+    .nullable()
+    .optional();
 // Schéma de validation pour la création d'un client
 const createClientSchema = zod_1.z.object({
     // Informations personnelles
@@ -37,24 +43,24 @@ const createClientSchema = zod_1.z.object({
     serviceType: zod_1.z.enum(['MASSOTHERAPIE', 'ESTHETIQUE']),
     assuranceCouvert: booleanOrString,
     // Informations médicales (optionnelles)
-    raisonConsultation: zod_1.z.string().optional(),
+    raisonConsultation: zod_1.z.string().nullable().optional(),
     diagnosticMedical: booleanOrString.optional(),
-    diagnosticMedicalDetails: zod_1.z.string().optional(),
+    diagnosticMedicalDetails: zod_1.z.string().nullable().optional(),
     medicaments: booleanOrString.optional(),
-    medicamentsDetails: zod_1.z.string().optional(),
+    medicamentsDetails: zod_1.z.string().nullable().optional(),
     accidents: booleanOrString.optional(),
-    accidentsDetails: zod_1.z.string().optional(),
+    accidentsDetails: zod_1.z.string().nullable().optional(),
     operationsChirurgicales: booleanOrString.optional(),
     operationsChirurgicalesDetails: zod_1.z.string().optional(),
     traitementsActuels: zod_1.z.string().optional(),
-    problemesCardiaques: booleanOrString.optional(),
-    problemesCardiaquesDetails: zod_1.z.string().optional(),
+    problemesCardiaques: zod_1.z.boolean().optional(),
+    problemesCardiaquesDetails: zod_1.z.string().nullable().optional(),
     maladiesGraves: booleanOrString.optional(),
-    maladiesGravesDetails: zod_1.z.string().optional(),
+    maladiesGravesDetails: zod_1.z.string().nullable().optional(),
     ortheses: booleanOrString.optional(),
-    orthesesDetails: zod_1.z.string().optional(),
+    orthesesDetails: zod_1.z.string().nullable().optional(),
     allergies: booleanOrString.optional(),
-    allergiesDetails: zod_1.z.string().optional(),
+    allergiesDetails: zod_1.z.string().nullable().optional(),
     // Conditions médicales
     raideurs: booleanOrString.optional(),
     arthrose: booleanOrString.optional(),
@@ -101,13 +107,15 @@ const createClientSchema = zod_1.z.object({
     irrigationSanguine: zod_1.z.string().optional(),
     impuretes: zod_1.z.string().optional(),
     sensibiliteCutanee: zod_1.z.string().optional(),
-    fumeur: zod_1.z.enum(['OUI', 'NON', 'OCCASIONNEL',]),
+    autreMaladieDetails: zod_1.z.string().nullable().optional(),
+    autreMaladie: zod_1.z.boolean().optional(),
+    fumeur: zod_1.z.enum(['OUI', 'NON', 'OCCASIONNEL',]).nullable().optional(),
     niveauStress: zod_1.z.string().optional(),
-    expositionSoleil: zod_1.z.enum(['RARE', 'MODEREE', 'FREQUENTE', 'TRES_FREQUENTE']),
-    protectionSolaire: zod_1.z.enum(['TOUJOURS', 'SOUVENT', 'RAREMENT', 'JAMAIS']),
-    suffisanceEau: zod_1.z.enum(['OUI', 'NON']),
-    travailExterieur: zod_1.z.enum(['OUI', 'NON']),
-    bainChauds: zod_1.z.enum(['OUI', 'NON']),
+    expositionSoleil: zod_1.z.enum(['RARE', 'MODEREE', 'FREQUENTE', 'TRES_FREQUENTE']).optional().nullable(),
+    protectionSolaire: zod_1.z.enum(['TOUJOURS', 'SOUVENT', 'RAREMENT', 'JAMAIS']).optional().nullable(),
+    suffisanceEau: zod_1.z.enum(['OUI', 'NON']).optional().nullable(),
+    travailExterieur: zod_1.z.enum(['OUI', 'NON']).optional().nullable(),
+    bainChauds: zod_1.z.enum(['OUI', 'NON']).optional().nullable(),
     routineSoins: zod_1.z.any().optional(),
     changementsRecents: zod_1.z.any().optional(),
     preferencePeau: zod_1.z.string().optional(),
@@ -140,7 +148,7 @@ const createClient = async (req, res) => {
         data: {
             ...validatedData,
             dateNaissance: new Date(validatedData.dateNaissance),
-            zonesDouleur: validatedData.zonesDouleur || [],
+            zonesDouleur: validatedData.zonesDouleur ?? [],
         },
     });
     // Envoyer l'email de confirmation (async, ne bloque pas la réponse)

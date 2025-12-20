@@ -42,4 +42,10 @@ export declare const resetPassword: (req: AuthRequest, res: Response) => Promise
  * @access  Privé (ADMIN uniquement)
  */
 export declare const toggleUserStatus: (req: AuthRequest, res: Response) => Promise<void>;
+/**
+ * @desc    Récupérer les avis détaillés d'un employé
+ * @route   GET /api/users/:id/reviews
+ * @access  Privé (ADMIN uniquement)
+ */
+export declare const getUserReviews: (req: AuthRequest, res: Response) => Promise<Response<any, Record<string, any>>>;
 //# sourceMappingURL=user.controller.d.ts.map

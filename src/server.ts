@@ -14,6 +14,7 @@ import assignmentRoutes from './modules/assignments/assignment.routes';
 import professionalRoutes from './modules/professionals/professional.routes';
 import userRoutes from './modules/users/user.routes';
 import marketingRoutes from './modules/marketing/marketing.routes';
+import reviewRoutes from './modules/reviews/review.routes';
 
 // Middleware d'erreur
 import { errorHandler } from './middleware/errorHandler';
@@ -91,6 +92,7 @@ app.use('/api/assignments', assignmentRoutes);
 app.use('/api/professionals', professionalRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/marketing', marketingRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 // Route 404
 app.use((req: Request, res: Response) => {

@@ -1,6 +1,48 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import prisma from '../../config/database';
 import { AuthRequest } from '../auth/auth';
+
+/**
+ * @desc    Récupérer la liste des professionnels actifs pour le formulaire d'avis (PUBLIC)
+ * @route   GET /api/professionals/public
+ * @access  Public
+ */
+export const getPublicProfessionals = async (req: Request, res: Response) => {
+  const { serviceType } = req.query;
+
+  const where: any = {
+    isActive: true,
+    role: {
+      in: ['MASSOTHERAPEUTE', 'ESTHETICIENNE']
+    }
+  };
+
+  if (serviceType === 'MASSOTHERAPIE') {
+    where.role = 'MASSOTHERAPEUTE';
+  } else if (serviceType === 'ESTHETIQUE') {
+    where.role = 'ESTHETICIENNE';
+  }
+
+  const professionals = await prisma.user.findMany({
+    where,
+    select: {
+      id: true,
+      prenom: true,
+      nom: true,
+      role: true,
+      isActive: true
+    },
+    orderBy: [
+      { nom: 'asc' },
+      { prenom: 'asc' }
+    ]
+  });
+
+  res.json({
+    success: true,
+    data: professionals
+  });
+};
 
 /**
  * @desc    Récupérer la liste des professionnels (MASSOTHERAPEUTE, ESTHETICIENNE)
@@ -103,7 +145,7 @@ export const getProfessionalById = async (req: AuthRequest, res: Response) => {
     });
   }
 
-  res.status(200).json({
+  return res.status(200).json({
     success: true,
     data: professional,
   });
@@ -156,7 +198,7 @@ export const getProfessionalStats = async (req: AuthRequest, res: Response) => {
     (c) => c.serviceType === 'ESTHETIQUE'
   ).length;
 
-  res.status(200).json({
+  return res.status(200).json({
     success: true,
     data: {
       totalClients,

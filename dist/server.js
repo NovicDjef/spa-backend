@@ -18,6 +18,7 @@ const assignment_routes_1 = __importDefault(require("./modules/assignments/assig
 const professional_routes_1 = __importDefault(require("./modules/professionals/professional.routes"));
 const user_routes_1 = __importDefault(require("./modules/users/user.routes"));
 const marketing_routes_1 = __importDefault(require("./modules/marketing/marketing.routes"));
+const review_routes_1 = __importDefault(require("./modules/reviews/review.routes"));
 // Middleware d'erreur
 const errorHandler_1 = require("./middleware/errorHandler");
 dotenv_1.default.config();
@@ -51,6 +52,7 @@ const limiter = (0, express_rate_limit_1.default)({
     legacyHeaders: false,
 });
 app.use('/api/', limiter);
+app.set('trust proxy', 1);
 // Parsing
 app.use(express_1.default.json({ limit: '10mb' }));
 app.use(express_1.default.urlencoded({ extended: true, limit: '10mb' }));
@@ -80,6 +82,7 @@ app.use('/api/assignments', assignment_routes_1.default);
 app.use('/api/professionals', professional_routes_1.default);
 app.use('/api/users', user_routes_1.default);
 app.use('/api/marketing', marketing_routes_1.default);
+app.use('/api/reviews', review_routes_1.default);
 // Route 404
 app.use((req, res) => {
     res.status(404).json({

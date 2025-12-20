@@ -3,8 +3,47 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProfessionalStats = exports.getProfessionalById = exports.getProfessionals = void 0;
+exports.getProfessionalStats = exports.getProfessionalById = exports.getProfessionals = exports.getPublicProfessionals = void 0;
 const database_1 = __importDefault(require("../../config/database"));
+/**
+ * @desc    Récupérer la liste des professionnels actifs pour le formulaire d'avis (PUBLIC)
+ * @route   GET /api/professionals/public
+ * @access  Public
+ */
+const getPublicProfessionals = async (req, res) => {
+    const { serviceType } = req.query;
+    const where = {
+        isActive: true,
+        role: {
+            in: ['MASSOTHERAPEUTE', 'ESTHETICIENNE']
+        }
+    };
+    if (serviceType === 'MASSOTHERAPIE') {
+        where.role = 'MASSOTHERAPEUTE';
+    }
+    else if (serviceType === 'ESTHETIQUE') {
+        where.role = 'ESTHETICIENNE';
+    }
+    const professionals = await database_1.default.user.findMany({
+        where,
+        select: {
+            id: true,
+            prenom: true,
+            nom: true,
+            role: true,
+            isActive: true
+        },
+        orderBy: [
+            { nom: 'asc' },
+            { prenom: 'asc' }
+        ]
+    });
+    res.json({
+        success: true,
+        data: professionals
+    });
+};
+exports.getPublicProfessionals = getPublicProfessionals;
 /**
  * @desc    Récupérer la liste des professionnels (MASSOTHERAPEUTE, ESTHETICIENNE)
  * @route   GET /api/professionals
@@ -98,7 +137,7 @@ const getProfessionalById = async (req, res) => {
             error: 'Professionnel non trouvé',
         });
     }
-    res.status(200).json({
+    return res.status(200).json({
         success: true,
         data: professional,
     });
@@ -141,7 +180,7 @@ const getProfessionalStats = async (req, res) => {
     });
     const massotherapieCount = clients.filter((c) => c.serviceType === 'MASSOTHERAPIE').length;
     const esthetiqueCount = clients.filter((c) => c.serviceType === 'ESTHETIQUE').length;
-    res.status(200).json({
+    return res.status(200).json({
         success: true,
         data: {
             totalClients,

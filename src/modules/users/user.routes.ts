@@ -9,6 +9,7 @@ import {
   deleteUser,
   resetPassword,
   toggleUserStatus,
+  getUserReviews,
 } from './user.controller';
 
 const router = Router();
@@ -35,11 +36,20 @@ router.get('/',
   asyncHandler(getAllUsers));
 
 /**
+ * @route   GET /api/users/:id/reviews
+ * @desc    Récupérer les avis détaillés d'un employé
+ * @access  ADMIN uniquement
+ */
+router.get('/:id/reviews',
+  authorize('ADMIN'),
+  asyncHandler(getUserReviews));
+
+/**
  * @route   GET /api/users/:id
  * @desc    Récupérer un employé par ID
  * @access  ADMIN uniquement
  */
-router.get('/:id', 
+router.get('/:id',
   authorize('ADMIN'),
   asyncHandler(getUserById));
 

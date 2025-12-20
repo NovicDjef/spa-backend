@@ -12,7 +12,8 @@
       "Bash(python3:*)",
       "Bash(npm run prisma:seed:*)",
       "Bash(npx prisma migrate dev:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(npm run build:*)"
     ]
   }
 }

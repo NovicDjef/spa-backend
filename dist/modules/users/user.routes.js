@@ -20,6 +20,12 @@ router.post('/', (0, auth_1.authorize)('ADMIN'), (0, errorHandler_1.asyncHandler
  */
 router.get('/', (0, auth_1.authorize)('ADMIN', 'SECRETAIRE'), (0, errorHandler_1.asyncHandler)(user_controller_1.getAllUsers));
 /**
+ * @route   GET /api/users/:id/reviews
+ * @desc    Récupérer les avis détaillés d'un employé
+ * @access  ADMIN uniquement
+ */
+router.get('/:id/reviews', (0, auth_1.authorize)('ADMIN'), (0, errorHandler_1.asyncHandler)(user_controller_1.getUserReviews));
+/**
  * @route   GET /api/users/:id
  * @desc    Récupérer un employé par ID
  * @access  ADMIN uniquement

@@ -108,21 +108,17 @@ export const getAllUsers = async (req: AuthRequest, res: Response) => {
 
   const users = await prisma.user.findMany({
     where,
-    select: {
-      id: true,
-      email: true,
-      telephone: true,
-      nom: true,
-      prenom: true,
-      role: true,
-      isActive: true,
-      createdAt: true,
+    include: {
       _count: {
         select: {
           assignedClients: true,
           notesCreated: true,
+          reviewsReceived: true,
         },
       },
+      reviewsReceived: {
+        select: { rating: true }
+      }
     },
     orderBy: [
       { role: 'asc' },
@@ -130,9 +126,34 @@ export const getAllUsers = async (req: AuthRequest, res: Response) => {
     ],
   });
 
+  // Calculer la moyenne pour chaque user
+  const usersWithStats = users.map(user => {
+    const reviewsCount = user.reviewsReceived.length;
+    const averageRating = reviewsCount > 0
+      ? user.reviewsReceived.reduce((sum, r) => sum + r.rating, 0) / reviewsCount
+      : null;
+
+    return {
+      id: user.id,
+      email: user.email,
+      telephone: user.telephone,
+      nom: user.nom,
+      prenom: user.prenom,
+      role: user.role,
+      isActive: user.isActive,
+      createdAt: user.createdAt,
+      _count: {
+        assignedClients: user._count.assignedClients,
+        notesCreated: user._count.notesCreated,
+        reviewsReceived: user._count.reviewsReceived
+      },
+      averageRating: averageRating ? Math.round(averageRating * 10) / 10 : null
+    };
+  });
+
   res.status(200).json({
     success: true,
-    data: users,
+    data: usersWithStats,
   });
 };
 
@@ -413,5 +434,80 @@ export const toggleUserStatus = async (req: AuthRequest, res: Response) => {
       ? `Employé ${updatedUser.nom} ${updatedUser.prenom} activé avec succès`
       : `Employé ${updatedUser.nom} ${updatedUser.prenom} désactivé avec succès`,
     data: updatedUser,
+  });
+};
+
+/**
+ * @desc    Récupérer les avis détaillés d'un employé
+ * @route   GET /api/users/:id/reviews
+ * @access  Privé (ADMIN uniquement)
+ */
+export const getUserReviews = async (req: AuthRequest, res: Response) => {
+  // Vérifier admin
+  if (req.user!.role !== 'ADMIN') {
+    return res.status(403).json({
+      success: false,
+      message: 'Accès interdit'
+    });
+  }
+
+  const { id } = req.params;
+
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      nom: true,
+      prenom: true
+    }
+  });
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: 'Utilisateur introuvable'
+    });
+  }
+
+  const reviews = await prisma.review.findMany({
+    where: { professionalId: id },
+    select: {
+      id: true,
+      rating: true,
+      comment: true,
+      createdAt: true
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 50
+  });
+
+  const totalReviews = reviews.length;
+  const averageRating = totalReviews > 0
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews
+    : 0;
+
+  const ratingDistribution = {
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+    5: 0
+  };
+
+  reviews.forEach(review => {
+    ratingDistribution[review.rating as keyof typeof ratingDistribution]++;
+  });
+
+  return res.json({
+    success: true,
+    data: {
+      user,
+      statistics: {
+        averageRating: Math.round(averageRating * 10) / 10,
+        totalReviews,
+        ratingDistribution
+      },
+      recentReviews: reviews
+    }
   });
 };
