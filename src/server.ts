@@ -15,9 +15,17 @@ import professionalRoutes from './modules/professionals/professional.routes';
 import userRoutes from './modules/users/user.routes';
 import marketingRoutes from './modules/marketing/marketing.routes';
 import reviewRoutes from './modules/reviews/review.routes';
+import calendarRoutes from './modules/calendar/calendar.routes';
+import bookingRoutes from './modules/bookings/booking.routes';
+import availabilityRoutes from './modules/availability/availability.routes';
+import paymentRoutes from './modules/payments/payment.routes';
+import publicRoutes from './modules/public/public.routes';
 
 // Middleware d'erreur
 import { errorHandler } from './middleware/errorHandler';
+
+// Scheduler pour les rappels automatiques
+import { startScheduler } from './lib/scheduler';
 
 dotenv.config();
 
@@ -60,6 +68,9 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 app.set('trust proxy', 1);
 
+// IMPORTANT: Webhook Stripe AVANT express.json() pour recevoir le raw body
+app.use('/api/payments', paymentRoutes);
+
 // Parsing
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -86,6 +97,7 @@ app.get('/health', (req: Request, res: Response) => {
 
 // Routes API
 app.use('/api/auth', authRoutes);
+app.use('/api/public', publicRoutes); // Routes publiques pour le site web
 app.use('/api/clients', clientRoutes);
 app.use('/api/notes', noteRoutes);
 app.use('/api/assignments', assignmentRoutes);
@@ -93,6 +105,9 @@ app.use('/api/professionals', professionalRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/marketing', marketingRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/calendar', calendarRoutes);
+app.use('/api/bookings', bookingRoutes);
+app.use('/api/availability', availabilityRoutes);
 
 // Route 404
 app.use((req: Request, res: Response) => {
@@ -112,12 +127,12 @@ if (process.env.NODE_ENV !== 'test') {
     ╔════════════════════════════════════════╗
     ║   🌸 API Gestion de Spa - Démarrée   ║
     ╚════════════════════════════════════════╝
-    
+
     📍 Serveur: http://localhost:${PORT}
     🏥 Health: http://localhost:${PORT}/health
     🔧 Mode: ${process.env.NODE_ENV}
     🌐 CORS: ${process.env.FRONTEND_URL}
-    
+
     📚 Routes disponibles:
        → POST   /api/auth/login
        → POST   /api/clients (public)
@@ -129,6 +144,9 @@ if (process.env.NODE_ENV !== 'test') {
        → GET    /api/marketing/contacts (admin - marketing)
        → POST   /api/marketing/send-email/campaign (admin)
     `);
+
+    // Démarrer le planificateur de rappels
+    startScheduler();
   });
 }
 

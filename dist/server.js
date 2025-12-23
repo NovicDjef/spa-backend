@@ -19,6 +19,9 @@ const professional_routes_1 = __importDefault(require("./modules/professionals/p
 const user_routes_1 = __importDefault(require("./modules/users/user.routes"));
 const marketing_routes_1 = __importDefault(require("./modules/marketing/marketing.routes"));
 const review_routes_1 = __importDefault(require("./modules/reviews/review.routes"));
+const calendar_routes_1 = __importDefault(require("./modules/calendar/calendar.routes"));
+const booking_routes_1 = __importDefault(require("./modules/bookings/booking.routes"));
+const availability_routes_1 = __importDefault(require("./modules/availability/availability.routes"));
 // Middleware d'erreur
 const errorHandler_1 = require("./middleware/errorHandler");
 dotenv_1.default.config();
@@ -83,6 +86,9 @@ app.use('/api/professionals', professional_routes_1.default);
 app.use('/api/users', user_routes_1.default);
 app.use('/api/marketing', marketing_routes_1.default);
 app.use('/api/reviews', review_routes_1.default);
+app.use('/api/calendar', calendar_routes_1.default);
+app.use('/api/bookings', booking_routes_1.default);
+app.use('/api/availability', availability_routes_1.default);
 // Route 404
 app.use((req, res) => {
     res.status(404).json({

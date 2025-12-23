@@ -13,7 +13,13 @@
       "Bash(npm run prisma:seed:*)",
       "Bash(npx prisma migrate dev:*)",
       "Bash(npm run dev:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(ls:*)",
+      "Bash(timeout 10 npm run dev)",
+      "Bash(npx tsx:*)",
+      "Bash(chmod:*)",
+      "Bash(./verify-services.sh:*)"
     ]
   }
 }
