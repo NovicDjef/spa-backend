@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "Bash(npm install:*)",
+      "Bash(npx prisma generate:*)",
+      "Bash(cat:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill -9)",
+      "Bash(pkill:*)",
+      "Bash(curl:*)",
+      "Bash(python3:*)",
+      "Bash(npm run prisma:seed:*)",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(ls:*)",
+      "Bash(timeout 10 npm run dev)",
+      "Bash(npx tsx:*)",
+      "Bash(chmod:*)",
+      "Bash(./verify-services.sh:*)",
+      "Bash(mkdir:*)",
+      "Bash(git rm:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)"
+    ]
+  }
+}

@@ -1,0 +1,169 @@
+# name: Deploy SPA Backend to VPS
+
+# on:
+#   push:
+#     branches: [ main, master ]
+#   pull_request:
+#     branches: [ main, master ]
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+#     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+#     steps:
+#     - name: Checkout code
+#       uses: actions/checkout@v4
+    
+#     - name: Deploy to VPS
+#       uses: appleboy/ssh-action@v1.0.3
+#       with:
+#         host: ${{ secrets.VPS_HOST }}
+#         username: ${{ secrets.VPS_USERNAME }}
+#         key: ${{ secrets.VPS_SSH_KEY }}
+#         port: ${{ secrets.VPS_PORT || 22 }}
+#         script: |
+#           echo "🚀 Starting SPA Backend deployment..."
+          
+#           # Variables
+#           APP_DIR="/var/www/apispa.novic.dev/spa-backend"
+#           BACKUP_DIR="/var/www/backups/spa-backend"
+#           APP_NAME="spa_backend"
+          
+#           # Create directories if they don't exist
+#           mkdir -p $APP_DIR
+#           mkdir -p $BACKUP_DIR
+          
+#           # Navigate to app directory
+#           cd $APP_DIR
+          
+#           # Backup current version
+#           if [ -d "$APP_DIR/.git" ]; then
+#             echo "📦 Creating backup..."
+#             BACKUP_FILE="$BACKUP_DIR/spa-backend-backup-$(date +%Y%m%d-%H%M%S).tar.gz"
+#             tar -czf $BACKUP_FILE --exclude=node_modules --exclude=.git . || echo "Backup warning"
+#             echo "✅ Backup saved to: $BACKUP_FILE"
+#           fi
+          
+#           # Pull latest code
+#           echo "📥 Pulling latest code..."
+#           if [ -d ".git" ]; then
+#             git fetch origin
+#             git reset --hard origin/main || git reset --hard origin/master
+#             git pull
+#           else
+#             echo "Cloning repository..."
+#             cd /var/www/api.dospa.novic.dev
+#             rm -rf spa-backend
+#             git clone https://${{ github.token }}@github.com/NovicDjef/spa-backend.git
+#             cd spa-backend
+#           fi
+          
+#           # Check Node.js version
+#           echo "🔍 Checking environment..."
+#           node --version
+#           npm --version
+          
+#           # Install dependencies
+#           echo "📦 Installing dependencies..."
+#           npm install
+          
+#           # Generate Prisma Client
+#           if [ -f "prisma/schema.prisma" ]; then
+#             echo "⚙️ Generating Prisma Client..."
+#             npx prisma generate
+            
+#             # Run database migrations
+#             echo "🗄️ Running database migrations..."
+#             npx prisma migrate deploy
+#           fi
+          
+#           # Update .env file with production secrets
+#           echo "⚙️ Updating .env file..."
+#           cat > .env << EOF
+#           # Server Configuration
+#           NODE_ENV=production
+#           PORT=3000
+          
+#           # Database
+#           DATABASE_URL="postgresql://postgres:motdepasse6$@localhost:5432/spa_management?schema=public"
+          
+#           # JWT Authentication
+#           JWT_SECRET="61e28605196d5db4f1ebdce9ec57e6ada4edf7383db7cea934bcbd3cb37b020da62b7f4f65b0268ad1ac7460dcc051787d8bba739b652ea2e3cf376818a46b03"
+#           JWT_EXPIRES_IN=7d
+          
+#           # Frontend URL (CORS)
+#           FRONTEND_URL="https://dospa.novic.dev"
+          
+#           # Other configurations
+#           LOG_LEVEL=info
+#           EOF
+          
+#           # Build TypeScript if needed
+#           if [ -f "tsconfig.json" ]; then
+#             echo "🔨 Building TypeScript..."
+#             npm run build
+#           fi
+          
+#           # Manage PM2 process
+#           echo "🔄 Managing PM2 process..."
+          
+#           # Install PM2 globally if not installed
+#           if ! command -v pm2 &> /dev/null; then
+#             echo "Installing PM2..."
+#             npm install -g pm2
+#           fi
+          
+#           # Create PM2 ecosystem file if it doesn't exist
+#           if [ ! -f "ecosystem.config.js" ]; then
+#             echo "Creating PM2 ecosystem file..."
+#             cat > ecosystem.config.js << 'EOL'
+#           module.exports = {
+#             apps: [{
+#               name: 'spa_backend',
+#               script: 'dist/server.js',
+#               instances: 'max',
+#               exec_mode: 'cluster',
+#               env: {
+#                 NODE_ENV: 'production',
+#                 PORT: 3000
+#               },
+#               error_file: 'logs/error.log',
+#               out_file: 'logs/out.log',
+#               merge_logs: true,
+#               time: true
+#             }]
+#           };
+#           EOL
+#           fi
+          
+#           # Restart the application
+#           if pm2 describe $APP_NAME > /dev/null 2>&1; then
+#             echo "Restarting existing PM2 process..."
+#             pm2 restart $APP_NAME
+#           else
+#             echo "Starting new PM2 process..."
+#             pm2 start ecosystem.config.js
+#           fi
+          
+#           # Save PM2 configuration
+#           pm2 save
+          
+#           # Display status
+#           echo "📊 PM2 Status:"
+#           pm2 status
+          
+#           echo "📋 Recent logs:"
+#           pm2 logs $APP_NAME --lines 20 --nostream || echo "No logs available yet"
+          
+#           # Setup PM2 startup script
+#           pm2 startup || echo "PM2 startup already configured"
+          
+#           # Clean old backups (keep only last 7)
+#           echo "🧹 Cleaning old backups..."
+#           cd $BACKUP_DIR
+#           ls -t | tail -n +8 | xargs -r rm -f
+          
+#           echo "✅ Deployment completed successfully!"
+#           echo "🌐 API available at: https://api.dospa.novic.dev"
+#           echo "🏥 Health check: https://api.dospa.novic.dev/health"

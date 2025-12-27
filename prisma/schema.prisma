@@ -1,0 +1,890 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Énumération des rôles utilisateurs (EMPLOYÉS SEULEMENT)
+enum UserRole {
+  SECRETAIRE
+  MASSOTHERAPEUTE
+  ESTHETICIENNE
+  ADMIN
+}
+
+// Énumération des types de service
+enum ServiceType {
+  MASSOTHERAPIE
+  ESTHETIQUE
+}
+
+// Énumération du genre
+enum Gender {
+  HOMME
+  FEMME
+  AUTRE
+}
+
+// Énumération des statuts de réservation
+enum BookingStatus {
+  PENDING           // Réservation créée (en attente)
+  CONFIRMED         // Réservation confirmée
+  CLIENT_ARRIVED    // Client est arrivé
+  IN_PROGRESS       // Service en cours
+  COMPLETED         // Service terminé
+  NO_SHOW           // Client absent
+  CANCELLED         // Réservation annulée
+}
+
+// Énumération des statuts de paiement
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+// Énumération des types de réservation
+enum BookingType {
+  SERVICE
+  PACKAGE
+  THERMAL
+}
+
+// Énumération des statuts de commande
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+// Énumération des types de réduction
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
+// Table des utilisateurs (EMPLOYÉS uniquement - avec authentification)
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  telephone String   @unique
+  password  String   // Hash bcrypt
+  role      UserRole
+  nom       String?
+  prenom    String?
+  photoUrl  String?  // Photo du technicien pour le calendrier
+  adresse   String?  // Adresse de l'employé
+  titreProfessionnel String?  // Titre professionnel (ex: "Senior", "Junior", "Certifié")
+  isActive  Boolean  @default(true) // Permet à l'ADMIN de bloquer/débloquer un employé
+
+  // Numéro d'ordre professionnel (pour les massothérapeutes)
+  numeroOrdre String?  // Numéro d'ordre du massothérapeute pour les reçus d'assurance
+
+  // Signature du thérapeute (pour les reçus d'assurance)
+  signatureUrl String?  // URL ou chemin vers l'image de signature du thérapeute
+
+  // Relations
+  notesCreated            Note[]
+  assignedClients         Assignment[]    @relation("ProfessionalAssignments")
+  createdAssignments      Assignment[]    @relation("CreatedAssignments")
+  reviewsReceived         Review[]        @relation("ReceivedReviews")
+  bookingsAsProfessional  Booking[]
+  availabilities          Availability[]
+  receiptsIssued          Receipt[]       @relation("IssuedReceipts")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([role])
+  @@index([isActive])
+}
+
+// Table des profils clients (SANS authentification - juste un formulaire)
+model ClientProfile {
+  id String @id @default(cuid())
+
+  // Informations personnelles
+  nom              String
+  prenom           String
+  adresse          String
+  ville            String
+  codePostal       String
+  telMaison        String?
+  telBureau        String?
+  telCellulaire    String   @unique
+  courriel         String   @unique
+  dateNaissance    DateTime
+  occupation       String?
+  gender           Gender
+  serviceType      ServiceType
+  assuranceCouvert Boolean
+  autreMaladie     Boolean?
+  autreMaladieDetails String?
+
+  // INFORMATIONS MASSOTHÉRAPIE
+  raisonConsultation              String?
+  diagnosticMedical               Boolean?
+  diagnosticMedicalDetails        String?
+  medicaments                     Boolean?
+  medicamentsDetails              String?
+  accidents                       Boolean?
+  accidentsDetails                String?
+  operationsChirurgicales         Boolean?
+  operationsChirurgicalesDetails  String?
+  traitementsActuels              String?
+  problemesCardiaques             Boolean   @default(false)
+  problemesCardiaquesDetails      String?
+  maladiesGraves                  Boolean   @default(false)
+  maladiesGravesDetails           String?
+  ortheses                        Boolean   @default(false)
+  orthesesDetails                 String?
+  allergies                       Boolean   @default(false)
+  allergiesDetails                String?
+
+  // Conditions médicales (massothérapie)
+  raideurs              Boolean @default(false)
+  arthrose              Boolean @default(false)
+  hernieDiscale         Boolean @default(false)
+  oedeme                Boolean @default(false)
+  tendinite             Boolean @default(false)
+  mauxDeTete            Boolean @default(false)
+  flatulence            Boolean @default(false)
+  troublesCirculatoires Boolean @default(false)
+  hypothyroidie         Boolean @default(false)
+  diabete               Boolean @default(false)
+  stresse               Boolean @default(false)
+  premenopause          Boolean @default(false)
+  douleurMusculaire     Boolean @default(false)
+  fibromyalgie          Boolean @default(false)
+  rhumatisme            Boolean @default(false)
+  sciatique             Boolean @default(false)
+  bursite               Boolean @default(false)
+  migraine              Boolean @default(false)
+  diarrhee              Boolean @default(false)
+  phlebite              Boolean @default(false)
+  hypertension          Boolean @default(false)
+  hypoglycemie          Boolean @default(false)
+  burnOut               Boolean @default(false)
+  menopause             Boolean @default(false)
+  inflammationAigue     Boolean @default(false)
+  arteriosclerose       Boolean @default(false)
+  osteoporose           Boolean @default(false)
+  mauxDeDos             Boolean @default(false)
+  fatigueDesJambes      Boolean @default(false)
+  troublesDigestifs     Boolean @default(false)
+  constipation          Boolean @default(false)
+  hyperthyroidie        Boolean @default(false)
+  hypotension           Boolean @default(false)
+  insomnie              Boolean @default(false)
+  depressionNerveuse    Boolean @default(false)
+  autres                String?
+
+  // NOUVEAUX CHAMPS pour tracking des emails
+  lastVisitDate         DateTime?
+  lastEmailSent         DateTime?
+  feedbackEmailsSent    Int       @default(0)
+  promoEmailsSent       Int       @default(0)
+
+  // Zones de douleur (massothérapie)
+  zonesDouleur String[] // Array de strings
+
+  // INFORMATIONS ESTHÉTIQUE
+  etatPeau            String?
+  etatPores           String?
+  coucheCornee        String?
+  irrigationSanguine  String?
+  impuretes           String?
+  sensibiliteCutanee  String?
+  fumeur              String?
+  niveauStress        String?
+  expositionSoleil    String?
+  protectionSolaire   String?
+  suffisanceEau       String?
+  travailExterieur    String?
+  bainChauds          String?
+  routineSoins        String?
+  changementsRecents  String?
+  preferencePeau      String?
+  diagnosticVisuelNotes String?
+
+  // Relations
+  notes       Note[]
+  assignments Assignment[]
+  receipts    Receipt[]  @relation("ClientReceipts")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courriel])
+  @@index([telCellulaire])
+  @@index([serviceType])
+  @@index([nom, prenom])
+}
+
+
+// Table des campagnes marketing
+model Campaign {
+  id              String   @id @default(cuid())
+  name            String   // Nom de la campagne (ex: "Promotion Massages Été 2024")
+  subject         String   // Sujet de l'email
+  messageTemplate String   @db.Text // Template du message avec placeholders
+
+  // Métadonnées
+  createdBy       String   // ID de l'admin qui a créé la campagne
+  createdAt       DateTime @default(now())
+
+  // Statistiques
+  totalRecipients Int      @default(0) // Nombre total de destinataires
+  successCount    Int      @default(0) // Nombre d'envois réussis
+  failureCount    Int      @default(0) // Nombre d'échecs
+
+  // Relation avec les emails envoyés
+  emails          EmailLog[]
+
+  @@index([createdAt])
+  @@index([createdBy])
+}
+
+model EmailLog {
+  id            String   @id @default(cuid())
+  type          String   // "FEEDBACK", "PROMO", etc.
+
+  // Destinataire
+  clientEmail   String
+  clientName    String?
+
+  // Contenu
+  subject       String
+  htmlContent   String   @db.Text
+
+  // Lié à quelle note/promo/campagne ?
+  noteId        String?
+  promotionId   String?
+  campaignId    String?
+  campaign      Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  // Statut d'envoi
+  status        String   @default("sent") // "sent", "failed", "bounced"
+  errorMessage  String?  // Message d'erreur si échec
+
+  // Tracking
+  sentAt        DateTime @default(now())
+  opened        Boolean  @default(false)
+  clicked       Boolean  @default(false)
+
+  @@index([clientEmail])
+  @@index([type])
+  @@index([sentAt])
+  @@index([noteId])
+  @@index([campaignId])
+  @@index([status])
+}
+// Table des notes de traitement
+model Note {
+  id      String @id @default(cuid())
+  content String @db.Text
+
+  // Relations
+  clientId String
+  client   ClientProfile @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+
+// NOUVEAUX CHAMPS pour l'automatisation
+  emailSent       Boolean   @default(false)  // Email de remerciement envoyé ?
+  emailSentAt     DateTime? // Quand ?
+
+  // Reçus d'assurance
+  receipt         Receipt?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientId])
+  @@index([authorId])
+  @@index([createdAt])
+  @@index([emailSent])  // NOUVEAU - pour filtrer rapidement
+}
+
+// Table d'assignation des clients aux professionnels
+// IMPORTANT: Un client peut être ré-assigné plusieurs fois au même professionnel
+// Chaque assignation crée un nouvel enregistrement avec une nouvelle date assignedAt
+// Cela permet de tracker les "nouveaux rendez-vous" pour les professionnels
+model Assignment {
+  id String @id @default(cuid())
+
+  // Relations
+  clientId String
+  client   ClientProfile @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  professionalId String
+  professional   User   @relation(fields: [professionalId], references: [id], name: "ProfessionalAssignments")
+
+  // Qui a créé cette assignation (secrétaire ou admin)
+  // Nullable pour les anciennes assignations créées avant cette fonctionnalité
+  createdById String?
+  createdBy   User?  @relation(fields: [createdById], references: [id], name: "CreatedAssignments")
+
+  assignedAt DateTime @default(now())
+
+  @@index([clientId])
+  @@index([professionalId])
+  @@index([createdById])
+  @@index([assignedAt])
+}
+
+// Table des avis pour les professionnels
+model Review {
+  id              String   @id @default(cuid())
+  rating          Int      // 1-5
+  comment         String?  @db.Text
+
+  // Relation avec le professionnel
+  professionalId  String
+  professional    User     @relation("ReceivedReviews", fields: [professionalId], references: [id], onDelete: Cascade)
+
+  // Métadonnées
+  isAnonymous     Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  // Index pour performance
+  @@index([professionalId])
+  @@index([createdAt])
+}
+
+// ============================================
+// SYSTÈME DE SERVICES ET RÉSERVATIONS
+// ============================================
+
+// Catégories de services (Massothérapie, Esthétique, etc.)
+model ServiceCategory {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?   @db.Text
+  displayOrder Int      @default(0)
+  isActive    Boolean   @default(true)
+
+  services    Service[]
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([isActive])
+  @@index([displayOrder])
+}
+
+// Services individuels (massages, soins, etc.)
+model Service {
+  id              String          @id @default(cuid())
+  name            String
+  slug            String          @unique
+  description     String?         @db.Text
+  duration        Int             // Durée en minutes
+  price           Decimal         @db.Decimal(10, 2)  // Prix AVANT taxes
+
+  categoryId      String
+  category        ServiceCategory @relation(fields: [categoryId], references: [id])
+
+  imageUrl        String?
+  displayOrder    Int             @default(0)
+  isActive        Boolean         @default(true)
+  requiresProfessional Boolean     @default(true)
+
+  // Relations
+  bookings        Booking[]
+  packageServices PackageService[]
+  promotions      ServicePromotion[]
+  receipts        Receipt[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([isActive])
+  @@index([slug])
+}
+
+// Forfaits/Packages (combinaisons de services)
+model Package {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  description     String?  @db.Text
+  price           Decimal  @db.Decimal(10, 2)
+  originalPrice   Decimal? @db.Decimal(10, 2)
+  discount        Decimal? @db.Decimal(5, 2)
+  variant         String?  // "Petite", "Grande", "Extra nuitée"
+
+  imageUrl        String?
+  displayOrder    Int      @default(0)
+  isActive        Boolean  @default(true)
+
+  // Services inclus
+  services        PackageService[]
+  bookings        Booking[]
+  promotions      PackagePromotion[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([slug])
+}
+
+// Services inclus dans un forfait
+model PackageService {
+  id         String   @id @default(cuid())
+  packageId  String
+  package    Package  @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  serviceId  String
+  service    Service  @relation(fields: [serviceId], references: [id])
+  quantity   Int      @default(1)
+  isOptional Boolean  @default(false)
+  extraCost  Decimal? @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+
+  @@index([packageId])
+  @@index([serviceId])
+}
+
+// ============================================
+// SYSTÈME DE PAIEMENTS
+// ============================================
+
+// Paiements via Stripe
+model Payment {
+  id                String         @id @default(cuid())
+
+  // Stripe (Optional pour les réservations manuelles - sera rempli lors du paiement réel)
+  stripePaymentId   String?        @unique
+  stripeCustomerId  String?
+
+  // Montants
+  amount            Decimal        @db.Decimal(10, 2)
+  currency          String         @default("CAD")
+
+  // Statut
+  status            PaymentStatus  @default(PENDING)
+
+  // Métadonnées
+  paymentMethod     String?
+  receiptUrl        String?
+  receiptPdfUrl     String?
+
+  // Relations (une seule sera remplie)
+  booking           Booking?
+  order             Order?
+  giftCard          GiftCard?
+  gymSubscription   GymSubscription?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([stripePaymentId])
+  @@index([status])
+}
+
+// ============================================
+// SYSTÈME DE RÉSERVATIONS
+// ============================================
+
+// Réservations de services
+model Booking {
+  id              String        @id @default(cuid())
+  bookingNumber   String        @unique
+
+  // Type de réservation
+  type            BookingType
+
+  // Service ou Package
+  serviceId       String?
+  service         Service?      @relation(fields: [serviceId], references: [id])
+  packageId       String?
+  package         Package?      @relation(fields: [packageId], references: [id])
+
+  // Client
+  clientEmail     String
+  clientName      String
+  clientPhone     String
+  specialNotes    String?       @db.Text
+
+  // Date et heure
+  bookingDate     DateTime      @db.Date
+  startTime       String        // "09:00"
+  endTime         String        // "10:30"
+
+  // Professionnel assigné
+  professionalId  String?
+  professional    User?         @relation(fields: [professionalId], references: [id])
+
+  // Montants
+  subtotal        Decimal       @db.Decimal(10, 2)
+  taxTPS          Decimal       @db.Decimal(10, 2)
+  taxTVQ          Decimal       @db.Decimal(10, 2)
+  total           Decimal       @db.Decimal(10, 2)
+
+  // Carte cadeau utilisée
+  giftCardId      String?
+  giftCard        GiftCard?     @relation(fields: [giftCardId], references: [id])
+  giftCardAmount  Decimal?      @db.Decimal(10, 2)
+
+  // Statut
+  status          BookingStatus @default(PENDING)
+
+  // Paiement
+  paymentId       String        @unique
+  payment         Payment       @relation(fields: [paymentId], references: [id])
+
+  // Rappel
+  reminderSent    Boolean       @default(false)
+
+  // Google Calendar
+  googleCalendarEventId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([bookingNumber])
+  @@index([clientEmail])
+  @@index([bookingDate])
+  @@index([professionalId])
+  @@index([status])
+}
+
+// Disponibilités des professionnels
+model Availability {
+  id             String   @id @default(cuid())
+  professionalId String
+  professional   User     @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  // Date et heures
+  date           DateTime @db.Date
+  startTime      String?   // "09:00" - Optional quand isAvailable = false (bloqué)
+  endTime        String?   // "17:00" - Optional quand isAvailable = false (bloqué)
+
+  // Statut
+  isAvailable    Boolean  @default(true)
+  reason         String?  // "VACATION", "SICK", "BOOKED", etc.
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([professionalId])
+  @@index([date])
+  @@unique([professionalId, date])
+}
+
+// ============================================
+// CARTES CADEAUX
+// ============================================
+
+model GiftCard {
+  id             String    @id @default(cuid())
+  code           String    @unique
+  amount         Decimal   @db.Decimal(10, 2)
+  balance        Decimal   @db.Decimal(10, 2)
+
+  // Acheteur et destinataire
+  purchasedBy    String?
+  recipientName  String?
+  recipientEmail String?
+  message        String?   @db.Text
+
+  // Statut
+  isActive       Boolean   @default(true)
+  expiresAt      DateTime?
+
+  // Paiement
+  paymentId      String    @unique
+  payment        Payment   @relation(fields: [paymentId], references: [id])
+
+  // Utilisation
+  usedInBookings Booking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([code])
+  @@index([isActive])
+}
+
+// ============================================
+// ABONNEMENTS GYM
+// ============================================
+
+model GymMembership {
+  id            String   @id @default(cuid())
+  type          String   @unique // "1_DAY", "1_MONTH", "3_MONTHS", etc.
+  name          String
+  price         Decimal  @db.Decimal(10, 2)
+  duration      Int      // Durée en jours
+  description   String?  @db.Text
+  displayOrder  Int      @default(0)
+  isActive      Boolean  @default(true)
+
+  subscriptions GymSubscription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([type])
+  @@index([isActive])
+}
+
+model GymSubscription {
+  id           String        @id @default(cuid())
+  membershipId String
+  membership   GymMembership @relation(fields: [membershipId], references: [id])
+
+  // Informations client
+  clientEmail  String
+  clientName   String
+  clientPhone  String
+
+  // Dates
+  startDate    DateTime
+  endDate      DateTime
+  isActive     Boolean       @default(true)
+
+  // Paiement
+  paymentId    String        @unique
+  payment      Payment       @relation(fields: [paymentId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([membershipId])
+  @@index([clientEmail])
+  @@index([isActive])
+  @@index([endDate])
+}
+
+// ============================================
+// PRODUITS E-COMMERCE
+// ============================================
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?  @db.Text
+  price       Decimal  @db.Decimal(10, 2)
+  stock       Int      @default(0)
+  category    String?
+  imageUrl    String?
+  displayOrder Int     @default(0)
+  isActive    Boolean  @default(true)
+
+  // Relations
+  orderItems  OrderItem[]
+  promotions  ProductPromotion[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([isActive])
+  @@index([slug])
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  orderNumber     String      @unique
+
+  // Client
+  clientEmail     String
+  clientName      String
+  clientPhone     String
+
+  // Livraison
+  shippingAddress String?     @db.Text
+
+  // Montants
+  subtotal        Decimal     @db.Decimal(10, 2)
+  taxTPS          Decimal     @db.Decimal(10, 2)
+  taxTVQ          Decimal     @db.Decimal(10, 2)
+  total           Decimal     @db.Decimal(10, 2)
+
+  // Statut
+  status          OrderStatus @default(PENDING)
+
+  // Paiement
+  paymentId       String      @unique
+  payment         Payment     @relation(fields: [paymentId], references: [id])
+
+  // Items
+  items           OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderNumber])
+  @@index([clientEmail])
+  @@index([status])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+// ============================================
+// SYSTÈME DE PROMOTIONS
+// ============================================
+
+model Promotion {
+  id            String       @id @default(cuid())
+  name          String
+  description   String?      @db.Text
+  code          String?      @unique
+
+  // Type de réduction
+  discountType  DiscountType
+  discountValue Decimal      @db.Decimal(10, 2)
+
+  // Dates
+  startDate     DateTime
+  endDate       DateTime
+
+  // Statut
+  isActive      Boolean      @default(true)
+
+  // Relations
+  services      ServicePromotion[]
+  packages      PackagePromotion[]
+  products      ProductPromotion[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([code])
+  @@index([isActive])
+  @@index([startDate, endDate])
+}
+
+model ServicePromotion {
+  id          String     @id @default(cuid())
+  promotionId String
+  promotion   Promotion  @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  serviceId   String
+  service     Service    @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([promotionId, serviceId])
+  @@index([promotionId])
+  @@index([serviceId])
+}
+
+model PackagePromotion {
+  id          String     @id @default(cuid())
+  promotionId String
+  promotion   Promotion  @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  packageId   String
+  package     Package    @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([promotionId, packageId])
+  @@index([promotionId])
+  @@index([packageId])
+}
+
+model ProductPromotion {
+  id          String     @id @default(cuid())
+  promotionId String
+  promotion   Promotion  @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([promotionId, productId])
+  @@index([promotionId])
+  @@index([productId])
+}
+
+// ============================================
+// SYSTÈME DE REÇUS POUR ASSURANCES
+// ============================================
+
+model Receipt {
+  id              String   @id @default(cuid())
+  receiptNumber   Int      // Numéro de reçu par thérapeute (commence à 1 pour chaque thérapeute)
+
+  // Lié à quel client
+  clientId        String
+  client          ClientProfile @relation("ClientReceipts", fields: [clientId], references: [id], onDelete: Cascade)
+
+  // Lié à quelle note de traitement (optionnel)
+  noteId          String?   @unique
+  note            Note?     @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  // Informations du client (nom seulement, pas d'email visible pour le massothérapeute)
+  clientName      String   // Prénom + Nom du client
+  clientEmail     String   // Email du client (caché pour le massothérapeute)
+
+  // Informations du massothérapeute
+  therapistId     String
+  therapist       User     @relation("IssuedReceipts", fields: [therapistId], references: [id])
+  therapistName   String   // Nom complet du massothérapeute
+  numeroOrdre     String   // Numéro d'ordre professionnel du massothérapeute
+
+  // Détails du service
+  serviceId       String?
+  service         Service? @relation(fields: [serviceId], references: [id])
+  serviceName     String   // Nom du massage (ex: "Massage thérapeutique")
+  duration        Int      // Durée en minutes (50, 60 ou 80)
+
+  // Prix et taxes
+  subtotal        Decimal  @db.Decimal(10, 2)  // Prix AVANT taxes
+  taxTPS          Decimal  @db.Decimal(10, 2)  // Taxe TPS (5%)
+  taxTVQ          Decimal  @db.Decimal(10, 2)  // Taxe TVQ (9.975%)
+  total           Decimal  @db.Decimal(10, 2)  // Prix total avec taxes
+
+  // Informations du spa
+  spaName         String   @default("Spa Renaissance")
+  spaAddress      String
+  spaPhone        String
+
+  // Date et heure du traitement
+  treatmentDate   DateTime @db.Date
+  treatmentTime   String   // Heure du rendez-vous (ex: "14:30")
+
+  // PDF généré
+  pdfUrl          String?  // URL du PDF généré (si stocké)
+
+  // Statut d'envoi
+  emailSent       Boolean  @default(false)
+  emailSentAt     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([therapistId, receiptNumber])  // Numéro unique par thérapeute
+  @@index([therapistId])
+  @@index([noteId])
+  @@index([createdAt])
+}
