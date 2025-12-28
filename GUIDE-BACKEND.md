@@ -943,7 +943,7 @@ export async function sendWelcomeEmail(
   prenom: string,
   serviceType: 'MASSOTHERAPIE' | 'ESTHETIQUE'
 ) {
-  const serviceLabel = serviceType === 'MASSOTHERAPIE' ? 'massothérapie' : 'soins esthétiques';
+  const serviceLabel = serviceType === 'MASSOTHERAPIE' ? 'massothérapie' : 'medico-Esthétique';
 
   const mailOptions = {
     from: `"Spa Renaissance" <${process.env.SMTP_FROM}>`,
@@ -991,8 +991,8 @@ export async function sendWelcomeEmail(
               </div>
             </div>
             <div class="footer">
-              <p>Spa Renaissance - Massothérapie & Soins Esthétiques</p>
-              <p>📧 info@sparenaissance.ca | 📞 (514) 123-4567</p>
+              <p>Spa Renaissance - Massothérapie & medico-Esthétique</p>
+              <p>📧 info@sparenaissance.ca | 📞 418-968-0606</p>
               <p style="margin-top: 20px; font-size: 11px;">
                 Cet email a été envoyé automatiquement. Merci de ne pas y répondre.
               </p>

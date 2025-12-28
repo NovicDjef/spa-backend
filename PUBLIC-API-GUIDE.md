@@ -57,7 +57,7 @@ Récupère toutes les catégories avec leurs services actifs.
     {
       "id": "cat_456",
       "name": "ESTHETIQUE",
-      "description": "Soins esthétiques et du visage",
+      "description": "medico-Esthétique et du visage",
       "services": [...]
     }
   ]

@@ -109,7 +109,8 @@ const generateReceiptPDF = (receipt: any): Promise<Buffer> => {
         .fontSize(8)
         .text(receipt.spaAddress, leftMargin, currentY + 13)
         .text(`Tél: ${receipt.spaPhone}`, leftMargin, currentY + 24)
-        .text(`N° d'ordre: ${receipt.numeroOrdre}`, leftMargin, currentY + 36);
+        .fontSize(10)
+        .text(`N° de membre: ${receipt.numeroOrdre}`, leftMargin, currentY + 37);
 
       // **EN-TÊTE DROITE** - Logo du spa (plus petit)
       try {

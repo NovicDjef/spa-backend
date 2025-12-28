@@ -68,7 +68,7 @@ export async function generateMarketingMessage(
       : `EXPERTISE EN MASSOTHÉRAPIE, KINÉSITHÉRAPIE ET ESTHÉTIQUE:
    - Massages thérapeutiques et relaxation
    - Rééducation et amélioration de la mobilité
-   - Soins esthétiques du visage et du corps
+   - medico-Esthétique du visage et du corps
    - Anti-âge et régénération cellulaire`;
 
     // Construire le prompt système pour guider ChatGPT

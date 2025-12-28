@@ -20,7 +20,7 @@ export async function sendWelcomeEmail(
   serviceType: 'MASSOTHERAPIE' | 'ESTHETIQUE'
 ) {
   const serviceLabel =
-    serviceType === 'MASSOTHERAPIE' ? 'massothérapie' : 'soins esthétiques';
+    serviceType === 'MASSOTHERAPIE' ? 'massothérapie' : 'medico-Esthétique';
 
   const mailOptions = {
     from: `"Spa Renaissance" <${process.env.SMTP_FROM}>`,
@@ -375,8 +375,8 @@ export async function sendBookingConfirmation(booking: {
               </p>
             </div>
             <div class="footer">
-              <p><strong>Spa Renaissance</strong> - Massothérapie & Soins Esthétiques</p>
-              <p>📧 info@sparenaissance.ca | 📞 (514) 123-4567</p>
+              <p><strong>Spa Renaissance</strong> - Massothérapie & medico-Esthétique</p>
+              <p>📧 info@sparenaissance.ca | 📞 418-968-0606</p>
             </div>
           </div>
         </body>
@@ -478,7 +478,7 @@ export async function sendBookingReminder(booking: {
 
               <p style="text-align: center; margin-top: 30px;">
                 <strong>Besoin d'annuler ou de modifier?</strong><br>
-                Contactez-nous au (514) 123-4567
+                Contactez-nous au 418-968-0606
               </p>
 
               <p style="text-align: center; color: #ff7043; font-weight: bold; margin-top: 30px;">
@@ -619,8 +619,8 @@ export async function sendGiftCardEmail(giftCard: {
               </p>
             </div>
             <div class="footer">
-              <p><strong>Spa Renaissance</strong> - Massothérapie & Soins Esthétiques</p>
-              <p>📧 info@sparenaissance.ca | 📞 (514) 123-4567</p>
+              <p><strong>Spa Renaissance</strong> - Massothérapie & medico-Esthétique</p>
+              <p>📧 info@sparenaissance.ca | 📞 418-968-0606</p>
             </div>
           </div>
         </body>
@@ -714,7 +714,7 @@ export async function sendGymSubscriptionConfirmation(subscription: {
             </div>
             <div class="footer">
               <p><strong>Spa Renaissance</strong> - Gym & Bien-être</p>
-              <p>📧 info@sparenaissance.ca | 📞 (514) 123-4567</p>
+              <p>📧 info@sparenaissance.ca | 📞 418-968-0606</p>
             </div>
           </div>
         </body>

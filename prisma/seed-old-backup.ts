@@ -27,7 +27,7 @@ async function main() {
     update: {},
     create: {
       name: 'ESTHETIQUE',
-      description: 'Soins esthétiques et du visage',
+      description: 'medico-Esthétique et du visage',
       displayOrder: 2,
       isActive: true,
     },
