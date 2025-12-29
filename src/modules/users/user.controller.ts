@@ -89,9 +89,15 @@ export const createUser = async (req: AuthRequest, res: Response) => {
  * @access  Privé (ADMIN uniquement)
  */
 export const getAllUsers = async (req: AuthRequest, res: Response) => {
-  const { role, search } = req.query;
+  const { role, search, includeInactive } = req.query;
 
   let where: any = {};
+
+  // Filtrer par statut actif (par défaut, exclure les utilisateurs bloqués)
+  // Sauf si includeInactive=true (pour l'admin qui veut voir tous les utilisateurs)
+  if (includeInactive !== 'true') {
+    where.isActive = true;
+  }
 
   // Filtrer par rôle
   if (role && ['SECRETAIRE', 'MASSOTHERAPEUTE', 'ESTHETICIENNE', 'ADMIN'].includes(role as string)) {

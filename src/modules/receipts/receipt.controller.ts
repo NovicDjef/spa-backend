@@ -511,65 +511,54 @@ const sendReceiptEmail = async (
           </p>
 
           <!-- Détails du reçu -->
-          <div style="
-            background:#f9f9f9;
-            border-left:4px solid #2c5f2d;
-            padding:18px;
-            margin:20px 0;
-            border-radius:4px;
-          ">
-            <div style="font-weight:600;color:#2c5f2d;margin-bottom:12px;font-size:16px;">
-              📋 Détails du reçu
-            </div>
+          <p style="margin-top:24px;margin-bottom:12px;font-weight:600;color:#2c5f2d;font-size:16px;">
+            Détails du reçu
+          </p>
 
-            <div style="margin:8px 0;display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eaeaea;">
-              <span style="font-weight:600;color:#666;">Numéro de reçu</span>
-              <span style="color:#1a1a1a;text-align:right;"><strong>N° ${receiptNumber}</strong></span>
-            </div>
-
-            <div style="margin:8px 0;display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eaeaea;">
-              <span style="font-weight:600;color:#666;">Thérapeute</span>
-              <span style="color:#1a1a1a;text-align:right;">${receiptDetails.therapistName}</span>
-            </div>
-
-            <div style="margin:8px 0;display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eaeaea;">
-              <span style="font-weight:600;color:#666;">Service</span>
-              <span style="color:#1a1a1a;text-align:right;">${receiptDetails.serviceName}</span>
-            </div>
-
-            <div style="margin:8px 0;display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eaeaea;">
-              <span style="font-weight:600;color:#666;">Durée</span>
-              <span style="color:#1a1a1a;text-align:right;">${receiptDetails.duration} minutes</span>
-            </div>
-
-            <div style="margin:8px 0;display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eaeaea;">
-              <span style="font-weight:600;color:#666;">Date du traitement</span>
-              <span style="color:#1a1a1a;text-align:right;">${formattedDate}</span>
-            </div>
-
-            <div style="margin:8px 0;display:flex;justify-content:space-between;padding:8px 0;">
-              <span style="font-weight:600;color:#666;">Heure</span>
-              <span style="color:#1a1a1a;text-align:right;">${receiptDetails.treatmentTime}</span>
-            </div>
+          <div style="margin:8px 0;padding:10px 0;border-bottom:1px solid #eaeaea;">
+            <span style="font-weight:600;color:#666;">Numéro de reçu:</span>
+            <span style="color:#1a1a1a;"> N° ${receiptNumber}</span>
           </div>
 
-          <div style="background:#e8f5e9;padding:15px;margin:20px 0;border-radius:5px;text-align:center;">
-            <p style="margin:0 0 5px 0;font-size:14px;color:#666;">Montant total (taxes incluses)</p>
-            <div style="font-size:32px;font-weight:600;color:#2c5f2d;">${receiptDetails.total.toFixed(2)} $ CAD</div>
+          <div style="margin:8px 0;padding:10px 0;border-bottom:1px solid #eaeaea;">
+            <span style="font-weight:600;color:#666;">Thérapeute:</span>
+            <span style="color:#1a1a1a;"> ${receiptDetails.therapistName}</span>
           </div>
 
-          <div style="background:#fff3cd;border-left:4px solid #ffc107;padding:15px;margin:20px 0;border-radius:5px;">
-            <p style="margin:0 0 10px 0;font-weight:600;">ℹ️ Informations importantes</p>
-            <p style="margin:0 0 5px 0;">
-              • Ce reçu est <strong>valide pour les réclamations d'assurance</strong>
-            </p>
-            <p style="margin:0 0 5px 0;">
-              • Conservez-le précieusement pour vos dossiers
-            </p>
-            <p style="margin:0;">
-              • Le document PDF ci-joint est le reçu officiel avec signature
-            </p>
+          <div style="margin:8px 0;padding:10px 0;border-bottom:1px solid #eaeaea;">
+            <span style="font-weight:600;color:#666;">Service:</span>
+            <span style="color:#1a1a1a;"> ${receiptDetails.serviceName}</span>
           </div>
+
+          <div style="margin:8px 0;padding:10px 0;border-bottom:1px solid #eaeaea;">
+            <span style="font-weight:600;color:#666;">Durée:</span>
+            <span style="color:#1a1a1a;"> ${receiptDetails.duration} minutes</span>
+          </div>
+
+          <div style="margin:8px 0;padding:10px 0;border-bottom:1px solid #eaeaea;">
+            <span style="font-weight:600;color:#666;">Date du traitement:</span>
+            <span style="color:#1a1a1a;"> ${formattedDate}</span>
+          </div>
+
+          <div style="margin:8px 0;padding:10px 0;border-bottom:1px solid #eaeaea;">
+            <span style="font-weight:600;color:#666;">Heure:</span>
+            <span style="color:#1a1a1a;"> ${receiptDetails.treatmentTime}</span>
+          </div>
+
+          <div style="margin:24px 0;padding:16px 0;border-top:2px solid #2c5f2d;border-bottom:2px solid #2c5f2d;text-align:center;">
+            <p style="margin:0 0 8px 0;font-size:14px;color:#666;">Montant total (taxes incluses)</p>
+            <div style="font-size:28px;font-weight:600;color:#2c5f2d;">${receiptDetails.total.toFixed(2)} $ CAD</div>
+          </div>
+
+          <p style="margin-top:24px;margin-bottom:8px;font-weight:600;color:#2c5f2d;">
+            Informations importantes
+          </p>
+
+          <ul style="margin:8px 0;padding-left:20px;line-height:1.8;">
+            <li>Ce reçu est <strong>valide pour les réclamations d'assurance</strong></li>
+            <li>Conservez-le précieusement pour vos dossiers</li>
+            <li>Le document PDF ci-joint est le reçu officiel avec signature</li>
+          </ul>
 
           <p>
             Si vous avez des questions concernant ce reçu ou votre traitement,

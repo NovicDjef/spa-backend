@@ -336,65 +336,55 @@ export async function sendBookingConfirmation(booking: {
           <p>Nous avons le plaisir de confirmer votre réservation au Spa Renaissance.</p>
 
           <!-- Détails de réservation -->
-          <div style="
-            background:#f9f9f9;
-            padding:18px;
-            border-left:4px solid #2c5f2d;
-            margin:20px 0;
-            border-radius:4px;
-          ">
-            <div style="font-weight:600;color:#2c5f2d;margin-bottom:12px;font-size:16px;">
-              Détails de votre réservation
-            </div>
+          <p style="margin-top:24px;margin-bottom:12px;font-weight:600;color:#2c5f2d;font-size:16px;">
+            Détails de votre réservation
+          </p>
 
-            <div style="margin:8px 0;">
-              <span style="font-weight:600;color:#666;">Numéro de réservation:</span>
-              <span style="color:#1a1a1a;"> ${booking.bookingNumber}</span>
-            </div>
+          <div style="margin:8px 0;padding:10px 0;border-bottom:1px solid #eaeaea;">
+            <span style="font-weight:600;color:#666;">Numéro de réservation:</span>
+            <span style="color:#1a1a1a;"> ${booking.bookingNumber}</span>
+          </div>
 
-            <div style="margin:8px 0;">
-              <span style="font-weight:600;color:#666;">Service:</span>
-              <span style="color:#1a1a1a;"> ${booking.serviceName}</span>
-            </div>
+          <div style="margin:8px 0;padding:10px 0;border-bottom:1px solid #eaeaea;">
+            <span style="font-weight:600;color:#666;">Service:</span>
+            <span style="color:#1a1a1a;"> ${booking.serviceName}</span>
+          </div>
 
-            <div style="margin:8px 0;">
-              <span style="font-weight:600;color:#666;">Professionnel(le):</span>
-              <span style="color:#1a1a1a;"> ${booking.professionalName}</span>
-            </div>
+          <div style="margin:8px 0;padding:10px 0;border-bottom:1px solid #eaeaea;">
+            <span style="font-weight:600;color:#666;">Professionnel(le):</span>
+            <span style="color:#1a1a1a;"> ${booking.professionalName}</span>
+          </div>
 
-            <div style="margin:8px 0;">
-              <span style="font-weight:600;color:#666;">Date:</span>
-              <span style="color:#1a1a1a;"> ${formattedDate}</span>
-            </div>
+          <div style="margin:8px 0;padding:10px 0;border-bottom:1px solid #eaeaea;">
+            <span style="font-weight:600;color:#666;">Date:</span>
+            <span style="color:#1a1a1a;"> ${formattedDate}</span>
+          </div>
 
-            <div style="margin:8px 0;">
-              <span style="font-weight:600;color:#666;">Heure:</span>
-              <span style="color:#1a1a1a;"> ${booking.startTime} - ${booking.endTime}</span>
-            </div>
+          <div style="margin:8px 0;padding:10px 0;border-bottom:1px solid #eaeaea;">
+            <span style="font-weight:600;color:#666;">Heure:</span>
+            <span style="color:#1a1a1a;"> ${booking.startTime} - ${booking.endTime}</span>
+          </div>
 
-            <div style="height:1px;background:#eaeaea;margin:12px 0;"></div>
-
-            <div style="margin:8px 0;">
-              <span style="font-weight:600;color:#666;">Total payé:</span>
-              <span style="font-size:18px;color:#2c5f2d;font-weight:600;"> ${booking.total.toFixed(2)}$ CAD</span>
-            </div>
+          <div style="margin:24px 0;padding:16px 0;border-top:2px solid #2c5f2d;border-bottom:2px solid #2c5f2d;text-align:center;">
+            <p style="margin:0 0 8px 0;font-size:14px;color:#666;">Total payé</p>
+            <div style="font-size:24px;font-weight:600;color:#2c5f2d;">${booking.total.toFixed(2)}$ CAD</div>
           </div>
 
           ${booking.address ? `
-            <div style="background:#fff3cd;padding:15px;border-radius:5px;margin:20px 0;">
-              <p style="margin:0;font-weight:600;">📍 Adresse:</p>
-              <p style="margin:5px 0 0 0;">${booking.address}</p>
-            </div>
+            <p style="margin-top:24px;margin-bottom:8px;font-weight:600;color:#2c5f2d;">
+              Adresse
+            </p>
+            <p style="margin:5px 0;">${booking.address}</p>
           ` : ''}
 
-          <div style="background:#e8f5e9;padding:15px;border-radius:5px;margin:20px 0;">
-            <p style="margin:0;font-weight:600;color:#2c5f2d;">💡 Conseils pour votre visite:</p>
-            <ul style="margin:10px 0 0 0;padding-left:20px;">
-              <li>Arrivez 10 minutes avant votre rendez-vous</li>
-              <li>Apportez une serviette si vous le souhaitez</li>
-              <li>Informez-nous de toute condition médicale particulière</li>
-            </ul>
-          </div>
+          <p style="margin-top:24px;margin-bottom:8px;font-weight:600;color:#2c5f2d;">
+            Conseils pour votre visite
+          </p>
+          <ul style="margin:8px 0;padding-left:20px;line-height:1.8;">
+            <li>Arrivez 10 minutes avant votre rendez-vous</li>
+            <li>Apportez une serviette si vous le souhaitez</li>
+            <li>Informez-nous de toute condition médicale particulière</li>
+          </ul>
 
           <p style="text-align:center;margin-top:22px;color:#2c5f2d;font-weight:600;">
             Nous avons hâte de vous accueillir !
@@ -513,16 +503,9 @@ export async function sendBookingReminder(booking: {
           <p>Nous vous rappelons votre rendez-vous au Spa Renaissance <strong>demain</strong>.</p>
 
           <!-- Détails du rappel -->
-          <div style="
-            background:#fff3cd;
-            padding:20px;
-            border-left:4px solid #2c5f2d;
-            margin:20px 0;
-            text-align:center;
-            border-radius:4px;
-          ">
-            <p style="margin:0;font-size:16px;">📅 ${formattedDate}</p>
-            <p style="font-size:24px;color:#2c5f2d;font-weight:600;margin:10px 0;">
+          <div style="margin:24px 0;padding:20px 0;border-top:2px solid #2c5f2d;border-bottom:2px solid #2c5f2d;text-align:center;">
+            <p style="margin:0 0 8px 0;font-size:16px;color:#666;">📅 ${formattedDate}</p>
+            <p style="font-size:28px;color:#2c5f2d;font-weight:600;margin:10px 0;">
               ${booking.startTime}
             </p>
             <p style="margin:10px 0 0 0;"><strong>${booking.serviceName}</strong></p>
@@ -530,20 +513,20 @@ export async function sendBookingReminder(booking: {
           </div>
 
           ${booking.address ? `
-            <div style="background:#e8f5e9;padding:15px;border-radius:5px;margin:20px 0;">
-              <p style="margin:0;font-weight:600;color:#2c5f2d;">📍 Adresse:</p>
-              <p style="margin:5px 0 0 0;">${booking.address}</p>
-            </div>
+            <p style="margin-top:24px;margin-bottom:8px;font-weight:600;color:#2c5f2d;">
+              Adresse
+            </p>
+            <p style="margin:5px 0;">${booking.address}</p>
           ` : ''}
 
-          <div style="background:#f9f9f9;padding:15px;border-radius:5px;margin:20px 0;">
-            <p style="margin:0;font-weight:600;color:#2c5f2d;">💡 N'oubliez pas:</p>
-            <ul style="margin:10px 0 0 0;padding-left:20px;">
-              <li>Arrivez 10 minutes avant l'heure</li>
-              <li>Apportez une serviette si souhaité</li>
-              <li>Prévoyez de quoi vous détendre!</li>
-            </ul>
-          </div>
+          <p style="margin-top:24px;margin-bottom:8px;font-weight:600;color:#2c5f2d;">
+            N'oubliez pas
+          </p>
+          <ul style="margin:8px 0;padding-left:20px;line-height:1.8;">
+            <li>Arrivez 10 minutes avant l'heure</li>
+            <li>Apportez une serviette si souhaité</li>
+            <li>Prévoyez de quoi vous détendre!</li>
+          </ul>
 
           <p style="text-align:center;margin-top:22px;">
             <strong>Besoin d'annuler ou de modifier?</strong><br>
@@ -659,55 +642,48 @@ export async function sendGiftCardEmail(giftCard: {
           <p>${giftCard.senderName ? `<strong>${giftCard.senderName}</strong> vous a` : 'Vous avez reçu'} une carte cadeau pour le Spa Renaissance!</p>
 
           ${giftCard.message ? `
-            <div style="background:#f9f9f9;padding:18px;border-left:4px solid #2c5f2d;margin:20px 0;font-style:italic;border-radius:4px;">
-              <p style="margin:0;font-weight:600;color:#2c5f2d;">Message personnel:</p>
-              <p style="margin:10px 0 0 0;">"${giftCard.message}"</p>
-            </div>
+            <p style="margin-top:24px;margin-bottom:8px;font-weight:600;color:#2c5f2d;">
+              Message personnel
+            </p>
+            <p style="font-style:italic;margin:5px 0;">"${giftCard.message}"</p>
           ` : ''}
 
           <!-- Carte cadeau -->
-          <div style="
-            background:#f5f5f5;
-            border:2px dashed #2c5f2d;
-            padding:30px;
-            text-align:center;
-            margin:20px 0;
-            border-radius:8px;
-          ">
-            <p style="margin:0;font-size:16px;color:#666;">Valeur de la carte</p>
-            <div style="font-size:48px;color:#2c5f2d;font-weight:600;margin:20px 0;">
+          <div style="margin:32px 0;padding:24px 0;border-top:2px dashed #2c5f2d;border-bottom:2px dashed #2c5f2d;text-align:center;">
+            <p style="margin:0 0 12px 0;font-size:16px;color:#666;">Valeur de la carte</p>
+            <div style="font-size:42px;color:#2c5f2d;font-weight:600;margin:16px 0;">
               ${giftCard.amount.toFixed(2)}$
             </div>
 
-            <p style="margin:20px 0 10px 0;font-weight:600;">Code de la carte:</p>
+            <p style="margin:24px 0 12px 0;font-weight:600;color:#666;">Code de la carte</p>
             <div style="
-              background:#ffffff;
-              padding:15px;
+              padding:16px;
               border:2px solid #2c5f2d;
               border-radius:6px;
               font-size:24px;
               font-family:monospace;
-              letter-spacing:2px;
-              margin:20px 0;
+              letter-spacing:3px;
+              margin:12px auto;
               color:#2c5f2d;
               font-weight:600;
+              display:inline-block;
             ">
               ${giftCard.code}
             </div>
 
-            <p style="margin:20px 0 0 0;font-size:12px;color:#666;">
+            <p style="margin:16px 0 0 0;font-size:12px;color:#666;">
               Présentez ce code lors de votre réservation
             </p>
           </div>
 
-          <div style="background:#e8f5e9;padding:15px;border-radius:5px;margin:20px 0;">
-            <p style="margin:0;font-weight:600;color:#2c5f2d;">💡 Comment utiliser votre carte:</p>
-            <ol style="margin:10px 0 0 0;padding-left:20px;">
-              <li>Choisissez votre service préféré</li>
-              <li>Réservez en ligne ou par téléphone</li>
-              <li>Utilisez le code lors du paiement</li>
-            </ol>
-          </div>
+          <p style="margin-top:24px;margin-bottom:8px;font-weight:600;color:#2c5f2d;">
+            Comment utiliser votre carte
+          </p>
+          <ol style="margin:8px 0;padding-left:20px;line-height:1.8;">
+            <li>Choisissez votre service préféré</li>
+            <li>Réservez en ligne ou par téléphone</li>
+            <li>Utilisez le code lors du paiement</li>
+          </ol>
 
           <div style="text-align:center;margin:30px 0;">
             <p style="font-size:16px;margin-bottom:12px;">Prêt(e) à réserver?</p>
@@ -835,46 +811,38 @@ export async function sendGymSubscriptionConfirmation(subscription: {
           <p>Votre abonnement au gym a été activé avec succès!</p>
 
           <!-- Détails de l'abonnement -->
-          <div style="
-            background:#f9f9f9;
-            padding:18px;
-            border-left:4px solid #2c5f2d;
-            margin:20px 0;
-            border-radius:4px;
-          ">
-            <div style="font-weight:600;color:#2c5f2d;margin-bottom:12px;font-size:16px;">
-              Détails de votre abonnement
-            </div>
+          <p style="margin-top:24px;margin-bottom:12px;font-weight:600;color:#2c5f2d;font-size:16px;">
+            Détails de votre abonnement
+          </p>
 
-            <div style="margin:8px 0;">
-              <span style="font-weight:600;color:#666;">Type:</span>
-              <span style="color:#1a1a1a;"> ${subscription.membershipName}</span>
-            </div>
-
-            <div style="margin:8px 0;">
-              <span style="font-weight:600;color:#666;">Début:</span>
-              <span style="color:#1a1a1a;"> ${formattedStartDate}</span>
-            </div>
-
-            <div style="margin:8px 0;">
-              <span style="font-weight:600;color:#666;">Fin:</span>
-              <span style="color:#1a1a1a;"> ${formattedEndDate}</span>
-            </div>
-
-            <div style="margin:8px 0;">
-              <span style="font-weight:600;color:#666;">Total payé:</span>
-              <span style="font-size:18px;color:#2c5f2d;font-weight:600;"> ${subscription.total.toFixed(2)}$ CAD</span>
-            </div>
+          <div style="margin:8px 0;padding:10px 0;border-bottom:1px solid #eaeaea;">
+            <span style="font-weight:600;color:#666;">Type:</span>
+            <span style="color:#1a1a1a;"> ${subscription.membershipName}</span>
           </div>
 
-          <div style="background:#e8f5e9;padding:15px;border-radius:5px;margin:20px 0;">
-            <p style="margin:0;font-weight:600;color:#2c5f2d;">💡 Informations importantes:</p>
-            <ul style="margin:10px 0 0 0;padding-left:20px;">
-              <li>Apportez une serviette et une bouteille d'eau</li>
-              <li>Les casiers sont disponibles gratuitement</li>
-              <li>Vestiaires avec douches disponibles</li>
-            </ul>
+          <div style="margin:8px 0;padding:10px 0;border-bottom:1px solid #eaeaea;">
+            <span style="font-weight:600;color:#666;">Début:</span>
+            <span style="color:#1a1a1a;"> ${formattedStartDate}</span>
           </div>
+
+          <div style="margin:8px 0;padding:10px 0;border-bottom:1px solid #eaeaea;">
+            <span style="font-weight:600;color:#666;">Fin:</span>
+            <span style="color:#1a1a1a;"> ${formattedEndDate}</span>
+          </div>
+
+          <div style="margin:24px 0;padding:16px 0;border-top:2px solid #2c5f2d;border-bottom:2px solid #2c5f2d;text-align:center;">
+            <p style="margin:0 0 8px 0;font-size:14px;color:#666;">Total payé</p>
+            <div style="font-size:24px;font-weight:600;color:#2c5f2d;">${subscription.total.toFixed(2)}$ CAD</div>
+          </div>
+
+          <p style="margin-top:24px;margin-bottom:8px;font-weight:600;color:#2c5f2d;">
+            Informations importantes
+          </p>
+          <ul style="margin:8px 0;padding-left:20px;line-height:1.8;">
+            <li>Apportez une serviette et une bouteille d'eau</li>
+            <li>Les casiers sont disponibles gratuitement</li>
+            <li>Vestiaires avec douches disponibles</li>
+          </ul>
 
           <p style="text-align:center;margin-top:22px;color:#2c5f2d;font-weight:600;">
             Bon entraînement!

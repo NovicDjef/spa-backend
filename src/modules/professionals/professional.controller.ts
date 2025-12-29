@@ -50,13 +50,19 @@ export const getPublicProfessionals = async (req: Request, res: Response) => {
  * @access  Privé (SECRETAIRE, ADMIN uniquement)
  */
 export const getProfessionals = async (req: AuthRequest, res: Response) => {
-  const { role, search } = req.query;
+  const { role, search, includeInactive } = req.query;
 
   let where: any = {
     role: {
       in: ['MASSOTHERAPEUTE', 'ESTHETICIENNE', 'ADMIN'],
     },
   };
+
+  // Filtrer par statut actif (par défaut, exclure les professionnels bloqués)
+  // Sauf si includeInactive=true (pour l'admin qui veut voir tous les professionnels)
+  if (includeInactive !== 'true') {
+    where.isActive = true;
+  }
 
   // Filtrer par rôle spécifique
   if (role && (role === 'MASSOTHERAPEUTE' || role === 'ESTHETICIENNE' || role === 'ADMIN')) {
