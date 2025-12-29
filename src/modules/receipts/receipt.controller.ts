@@ -454,169 +454,157 @@ const sendReceiptEmail = async (
     subject: `Reçu d'assurance N° ${receiptNumber} - Spa Renaissance`,
     html: `
       <!DOCTYPE html>
-      <html>
+      <html lang="fr">
       <head>
         <meta charset="UTF-8">
-        <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
-          .container { max-width: 600px; margin: 0 auto; padding: 0; }
-          .header {
-            background: linear-gradient(135deg, #2c5f2d 0%, #1a3d1f 100%);
-            color: white;
-            padding: 30px 20px;
-            text-align: center;
-          }
-          .header h1 { margin: 0; font-size: 28px; }
-          .header p { margin: 10px 0 0 0; font-size: 14px; opacity: 0.9; }
-          .content { padding: 30px 20px; background-color: #f9f9f9; }
-          .receipt-details {
-            background: white;
-            border-left: 4px solid #2c5f2d;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 5px;
-          }
-          .receipt-details h2 {
-            color: #2c5f2d;
-            margin-top: 0;
-            font-size: 18px;
-          }
-          .detail-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
-          }
-          .detail-row:last-child { border-bottom: none; }
-          .detail-label {
-            font-weight: 600;
-            color: #555;
-          }
-          .detail-value {
-            color: #333;
-            text-align: right;
-          }
-          .total-amount {
-            background: #e8f5e9;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 5px;
-            text-align: center;
-          }
-          .total-amount .amount {
-            font-size: 32px;
-            font-weight: bold;
-            color: #2c5f2d;
-          }
-          .info-box {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 5px;
-          }
-          .footer {
-            padding: 20px;
-            text-align: center;
-            font-size: 12px;
-            color: #777;
-            background: #f5f5f5;
-          }
-          .footer p { margin: 5px 0; }
-          .contact-info {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #ddd;
-          }
-        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
       </head>
-      <body>
-        <div class="container">
-          <div class="header">
-            <h1>Spa Renaissance</h1>
-            <p>Reçu d'assurance</p>
+
+      <body style="
+        margin:0;
+        padding:0;
+        background-color:#ffffff;
+        font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+        color:#1a1a1a;
+        line-height:1.65;
+      ">
+
+      <div style="max-width:600px;margin:0 auto;padding:16px 14px 8px;">
+
+        <!-- Logo -->
+        <div style="text-align:center;margin-bottom:14px;">
+          <img
+            src="https://www.sparenaissance.ca/wp-content/uploads/2022/11/logo_spa_renaissance_2022_footer.png"
+            alt="Spa Renaissance"
+            style="max-width:120px;height:auto;"
+          />
+        </div>
+
+        <!-- Nom -->
+        <div style="
+          text-align:center;
+          font-size:18px;
+          font-weight:500;
+          color:#2c5f2d;
+          margin-bottom:18px;
+        ">
+          Spa Renaissance
+        </div>
+
+        <!-- Message -->
+        <div style="font-size:15px;">
+          <div style="
+            text-align:center;
+            font-size:20px;
+            font-weight:600;
+            color:#2c5f2d;
+            margin-bottom:18px;
+          ">
+            Reçu d'assurance
           </div>
 
-          <div class="content">
-            <p style="font-size: 16px;"><strong>Bonjour ${clientName},</strong></p>
+          <p><strong>Bonjour ${clientName},</strong></p>
 
-            <p>
-              Nous vous remercions d'avoir choisi le Spa Renaissance pour votre soin de bien-être.
-              Veuillez trouver ci-joint votre reçu d'assurance officiel.
-            </p>
+          <p>
+            Nous vous remercions d'avoir choisi le Spa Renaissance pour votre soin de bien-être.
+            Veuillez trouver ci-joint votre reçu d'assurance officiel.
+          </p>
 
-            <div class="receipt-details">
-              <h2>📋 Détails du reçu</h2>
-              <div class="detail-row">
-                <span class="detail-label">Numéro de reçu</span>
-                <span class="detail-value"><strong>N° ${receiptNumber}</strong></span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Thérapeute</span>
-                <span class="detail-value">${receiptDetails.therapistName}</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Service</span>
-                <span class="detail-value">${receiptDetails.serviceName}</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Durée</span>
-                <span class="detail-value">${receiptDetails.duration} minutes</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Date du traitement</span>
-                <span class="detail-value">${formattedDate}</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">Heure</span>
-                <span class="detail-value">${receiptDetails.treatmentTime}</span>
-              </div>
+          <!-- Détails du reçu -->
+          <div style="
+            background:#f9f9f9;
+            border-left:4px solid #2c5f2d;
+            padding:18px;
+            margin:20px 0;
+            border-radius:4px;
+          ">
+            <div style="font-weight:600;color:#2c5f2d;margin-bottom:12px;font-size:16px;">
+              📋 Détails du reçu
             </div>
 
-            <div class="total-amount">
-              <p style="margin: 0 0 5px 0; font-size: 14px; color: #666;">Montant total (taxes incluses)</p>
-              <div class="amount">${receiptDetails.total.toFixed(2)} $ CAD</div>
+            <div style="margin:8px 0;display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eaeaea;">
+              <span style="font-weight:600;color:#666;">Numéro de reçu</span>
+              <span style="color:#1a1a1a;text-align:right;"><strong>N° ${receiptNumber}</strong></span>
             </div>
 
-            <div class="info-box">
-              <p style="margin: 0 0 10px 0;"><strong>ℹ️ Informations importantes</strong></p>
-              <p style="margin: 0 0 5px 0;">
-                • Ce reçu est <strong>valide pour les réclamations d'assurance</strong>
-              </p>
-              <p style="margin: 0 0 5px 0;">
-                • Conservez-le précieusement pour vos dossiers
-              </p>
-              <p style="margin: 0;">
-                • Le document PDF ci-joint est le reçu officiel avec signature
-              </p>
+            <div style="margin:8px 0;display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eaeaea;">
+              <span style="font-weight:600;color:#666;">Thérapeute</span>
+              <span style="color:#1a1a1a;text-align:right;">${receiptDetails.therapistName}</span>
             </div>
 
-            <p>
-              Si vous avez des questions concernant ce reçu ou votre traitement,
-              n'hésitez pas à nous contacter. Il nous fera plaisir de vous aider.
-            </p>
+            <div style="margin:8px 0;display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eaeaea;">
+              <span style="font-weight:600;color:#666;">Service</span>
+              <span style="color:#1a1a1a;text-align:right;">${receiptDetails.serviceName}</span>
+            </div>
 
-            <p style="margin-top: 25px;">
-              Merci de votre confiance,<br>
-              <strong>L'équipe du Spa Renaissance</strong>
-            </p>
+            <div style="margin:8px 0;display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eaeaea;">
+              <span style="font-weight:600;color:#666;">Durée</span>
+              <span style="color:#1a1a1a;text-align:right;">${receiptDetails.duration} minutes</span>
+            </div>
 
-            <div class="contact-info">
-              <p style="margin: 5px 0; color: #2c5f2d;"><strong>Spa Renaissance</strong></p>
-              <p style="margin: 3px 0; font-size: 13px;">📍 451 avenue Arnaud, suite 101, Sept-Îles, Québec G4R 3B3</p>
-              <p style="margin: 3px 0; font-size: 13px;">📞 418-968-0606</p>
-              <p style="margin: 3px 0; font-size: 13px;">✉️ info@sparenaissance.ca</p>
+            <div style="margin:8px 0;display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eaeaea;">
+              <span style="font-weight:600;color:#666;">Date du traitement</span>
+              <span style="color:#1a1a1a;text-align:right;">${formattedDate}</span>
+            </div>
+
+            <div style="margin:8px 0;display:flex;justify-content:space-between;padding:8px 0;">
+              <span style="font-weight:600;color:#666;">Heure</span>
+              <span style="color:#1a1a1a;text-align:right;">${receiptDetails.treatmentTime}</span>
             </div>
           </div>
 
-          <div class="footer">
-            <p><strong>Note :</strong> Ce courriel a été envoyé automatiquement. Veuillez ne pas y répondre directement.</p>
-            <p>Pour toute question, contactez-nous au 418-968-0606 ou à info@sparenaissance.ca</p>
-            <p style="margin-top: 10px; color: #999;">
-              © ${new Date().getFullYear()} Spa Renaissance - Tous droits réservés
+          <div style="background:#e8f5e9;padding:15px;margin:20px 0;border-radius:5px;text-align:center;">
+            <p style="margin:0 0 5px 0;font-size:14px;color:#666;">Montant total (taxes incluses)</p>
+            <div style="font-size:32px;font-weight:600;color:#2c5f2d;">${receiptDetails.total.toFixed(2)} $ CAD</div>
+          </div>
+
+          <div style="background:#fff3cd;border-left:4px solid #ffc107;padding:15px;margin:20px 0;border-radius:5px;">
+            <p style="margin:0 0 10px 0;font-weight:600;">ℹ️ Informations importantes</p>
+            <p style="margin:0 0 5px 0;">
+              • Ce reçu est <strong>valide pour les réclamations d'assurance</strong>
             </p>
+            <p style="margin:0 0 5px 0;">
+              • Conservez-le précieusement pour vos dossiers
+            </p>
+            <p style="margin:0;">
+              • Le document PDF ci-joint est le reçu officiel avec signature
+            </p>
+          </div>
+
+          <p>
+            Si vous avez des questions concernant ce reçu ou votre traitement,
+            n'hésitez pas à nous contacter. Il nous fera plaisir de vous aider.
+          </p>
+
+          <p style="margin-top:25px;">
+            Merci de votre confiance,<br>
+            <strong>L'équipe du Spa Renaissance</strong>
+          </p>
+        </div>
+
+        <!-- Séparateur -->
+        <div style="height:1px;background:#eaeaea;margin:22px 0;"></div>
+
+        <!-- Footer -->
+        <div style="
+          text-align:center;
+          font-size:12px;
+          color:#666;
+          line-height:1.5;
+        ">
+          <div style="font-weight:600;color:#2c5f2d;">Spa Renaissance</div>
+          <div>451 avenue Arnaud, suite 101, Sept-Îles, Québec G4R 3B3</div>
+          <div style="margin-top:6px;">info@sparenaissance.ca • 418-968-0606</div>
+          <div style="margin-top:6px;color:#999;font-size:11px;">
+            © ${new Date().getFullYear()} Spa Renaissance - Tous droits réservés
+          </div>
+          <div style="margin-top:10px;font-size:11px;color:#999;">
+            Ce courriel a été envoyé automatiquement, merci de ne pas y répondre.
           </div>
         </div>
+
+      </div>
+
       </body>
       </html>
     `,

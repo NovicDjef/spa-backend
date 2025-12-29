@@ -59,8 +59,6 @@ async function checkAndSendReminders() {
           professionalName,
           bookingDate: booking.bookingDate,
           startTime: booking.startTime,
-          endTime: booking.endTime,
-          total: parseFloat(booking.total.toString()),
           address: process.env.SPA_ADDRESS || undefined,
         });
 

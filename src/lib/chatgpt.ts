@@ -1,23 +1,9 @@
 import OpenAI from 'openai';
-import * as fs from 'fs';
-import * as path from 'path';
 
 // Initialiser le client OpenAI
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-
-// Fonction utilitaire pour convertir le logo en base64
-function getLogoBase64(): string {
-  try {
-    const logoPath = path.join(__dirname, '..', 'utils', 'logo_spa.png');
-    const logoBuffer = fs.readFileSync(logoPath);
-    return `data:image/png;base64,${logoBuffer.toString('base64')}`;
-  } catch (error) {
-    console.error('Erreur lors du chargement du logo:', error);
-    return ''; // Retourner une chaîne vide si le logo n'est pas trouvé
-  }
-}
 
 /**
  * Remplace les placeholders dans un message par les vraies valeurs du client
@@ -337,42 +323,73 @@ STRUCTURE ATTENDUE (contenu uniquement, sans en-tête/pied de page):
       throw new Error('Aucun message n\'a été généré par ChatGPT');
     }
 
-    // Récupérer le logo en base64
-    const logoBase64 = getLogoBase64();
-
-    // Envelopper le message avec le logo du Spa Renaissance
+    // Envelopper le message avec le format standard Spa Renaissance
     const messageWithLogo = `
-<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #ffffff;">
-  <!-- En-tête avec logo -->
-  <div style="background: linear-gradient(135deg, #2c5f2d 0%, #1a3d1f 100%);
-              padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-    ${logoBase64 ? `<img src="${logoBase64}" alt="Spa Renaissance" style="max-width: 200px; height: auto; margin-bottom: 15px;">` : ''}
-    <h1 style="margin: 0; font-size: 28px; color: white; font-weight: bold;">Spa Renaissance</h1>
-    <p style="margin: 10px 0 0 0; font-size: 14px; color: #e0e0e0;">Suivi de votre soin</p>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body style="
+  margin:0;
+  padding:0;
+  background-color:#ffffff;
+  font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  color:#1a1a1a;
+  line-height:1.65;
+">
+
+<div style="max-width:600px;margin:0 auto;padding:16px 14px 8px;">
+
+  <!-- Logo -->
+  <div style="text-align:center;margin-bottom:14px;">
+    <img
+      src="https://www.sparenaissance.ca/wp-content/uploads/2022/11/logo_spa_renaissance_2022_footer.png"
+      alt="Spa Renaissance"
+      style="max-width:120px;height:auto;"
+    />
+  </div>
+
+  <!-- Nom -->
+  <div style="
+    text-align:center;
+    font-size:18px;
+    font-weight:500;
+    color:#2c5f2d;
+    margin-bottom:18px;
+  ">
+    Spa Renaissance
   </div>
 
   <!-- Contenu du message généré par ChatGPT -->
-  <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+  <div style="font-size:15px;">
     ${generatedMessage}
   </div>
 
-  <!-- Pied de page avec informations du spa -->
-  <div style="margin-top: 20px; padding: 20px; background: #f5f5f5; border-radius: 10px;
-              text-align: center; color: #777; font-size: 12px;">
-    <p style="margin: 0 0 10px 0; font-weight: bold; color: #2c5f2d; font-size: 14px;">
-      Spa Renaissance
-    </p>
-    <p style="margin: 0 0 5px 0;">
-      📍 451 avenue Arnaud, suite 101, Sept-Îles, Québec G4R 3B3
-    </p>
-    <p style="margin: 0 0 5px 0;">
-      📞 418-968-0606
-    </p>
-    <p style="margin: 0;">
-      ✉️ info@sparenaissance.ca
-    </p>
+  <!-- Séparateur -->
+  <div style="height:1px;background:#eaeaea;margin:22px 0;"></div>
+
+  <!-- Footer -->
+  <div style="
+    text-align:center;
+    font-size:12px;
+    color:#666;
+    line-height:1.5;
+  ">
+    <div style="font-weight:600;color:#2c5f2d;">Spa Renaissance</div>
+    <div>451 avenue Arnaud, suite 101, Sept-Îles, Québec G4R 3B3</div>
+    <div style="margin-top:6px;">info@sparenaissance.ca • 418-968-0606</div>
+    <div style="margin-top:6px;color:#999;font-size:11px;">
+      © ${new Date().getFullYear()} Spa Renaissance
+    </div>
   </div>
-</div>`;
+
+</div>
+
+</body>
+</html>`;
 
     // Générer aussi un sujet personnalisé
     const subjectCompletion = await openai.chat.completions.create({

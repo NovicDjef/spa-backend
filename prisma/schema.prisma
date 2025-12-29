@@ -121,8 +121,8 @@ model ClientProfile {
   codePostal       String
   telMaison        String?
   telBureau        String?
-  telCellulaire    String   @unique
-  courriel         String   @unique
+  telCellulaire    String
+  courriel         String
   dateNaissance    DateTime
   occupation       String?
   gender           Gender
@@ -229,6 +229,8 @@ model ClientProfile {
   @@index([telCellulaire])
   @@index([serviceType])
   @@index([nom, prenom])
+  @@unique([courriel, serviceType])
+  @@unique([telCellulaire, serviceType])
 }
 
 

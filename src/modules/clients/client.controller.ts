@@ -172,22 +172,34 @@ export const createClient = async (req: Request, res: Response) => {
   // Validation
   const validatedData = createClientSchema.parse(req.body);
 
-  // Vérifier l'unicité de l'email dans ClientProfile
-  const existingEmail = await prisma.clientProfile.findUnique({
-    where: { courriel: validatedData.courriel },
+  // Vérifier si un client avec le même email existe déjà POUR LE MÊME TYPE DE SERVICE
+  const existingEmailForServiceType = await prisma.clientProfile.findFirst({
+    where: {
+      courriel: validatedData.courriel,
+      serviceType: validatedData.serviceType,
+    },
   });
 
-  if (existingEmail) {
-    throw new AppError('Cet email est déjà utilisé', 400);
+  if (existingEmailForServiceType) {
+    throw new AppError(
+      `Cet email est déjà utilisé pour un dossier ${validatedData.serviceType === 'MASSOTHERAPIE' ? 'de massothérapie' : 'd\'esthétique'}`,
+      400
+    );
   }
 
-  // Vérifier l'unicité du téléphone dans ClientProfile
-  const existingPhone = await prisma.clientProfile.findUnique({
-    where: { telCellulaire: validatedData.telCellulaire },
+  // Vérifier si un client avec le même téléphone existe déjà POUR LE MÊME TYPE DE SERVICE
+  const existingPhoneForServiceType = await prisma.clientProfile.findFirst({
+    where: {
+      telCellulaire: validatedData.telCellulaire,
+      serviceType: validatedData.serviceType,
+    },
   });
 
-  if (existingPhone) {
-    throw new AppError('Ce numéro de téléphone est déjà utilisé', 400);
+  if (existingPhoneForServiceType) {
+    throw new AppError(
+      `Ce numéro de téléphone est déjà utilisé pour un dossier ${validatedData.serviceType === 'MASSOTHERAPIE' ? 'de massothérapie' : 'd\'esthétique'}`,
+      400
+    );
   }
 
   // Créer le profil client directement (SANS User)
