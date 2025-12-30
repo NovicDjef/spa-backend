@@ -8,7 +8,7 @@ La clé API SendGrid a été ajoutée dans le fichier `.env` :
 SMTP_HOST=smtp.sendgrid.net
 SMTP_PORT=587
 SMTP_USER=apikey
-SMTP_PASSWORD=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
+SMTP_PASSWORD=SG.xxxxxxx
 SMTP_FROM=info@sparenaissance.ca
 ```
 
