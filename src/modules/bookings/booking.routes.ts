@@ -7,6 +7,11 @@ import {
   updateBooking,
   cancelBooking,
 } from './booking.controller';
+import {
+  createOnlineBooking,
+  moveBooking,
+  getBookingHistoryById,
+} from './booking.controller.enhanced';
 import { authenticate, authorize } from '../auth/auth';
 import { asyncHandler } from '../../middleware/errorHandler';
 
@@ -83,5 +88,31 @@ router.delete(
   authorize('ADMIN', 'SECRETAIRE'),
   asyncHandler(cancelBooking)
 );
+
+/**
+ * @route   POST /api/bookings/online
+ * @desc    Créer une réservation en ligne (depuis le site web)
+ * @access  Public
+ */
+router.post('/online', asyncHandler(createOnlineBooking));
+
+/**
+ * @route   PATCH /api/bookings/:id/move
+ * @desc    Déplacer une réservation (drag & drop)
+ * @access  Privé (ADMIN, SECRETAIRE)
+ */
+router.patch(
+  '/:id/move',
+  authenticate,
+  authorize('ADMIN', 'SECRETAIRE'),
+  asyncHandler(moveBooking)
+);
+
+/**
+ * @route   GET /api/bookings/:id/history
+ * @desc    Obtenir l'historique d'une réservation
+ * @access  Privé
+ */
+router.get('/:id/history', authenticate, asyncHandler(getBookingHistoryById));
 
 export default router;

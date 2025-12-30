@@ -24,6 +24,29 @@ router.get(
 );
 
 /**
+ * @route   GET /api/clients/autocomplete
+ * @desc    Autocomplete clients (recherche rapide)
+ * @access  Privé (ADMIN, SECRETAIRE)
+ */
+router.get(
+  '/autocomplete',
+  authenticate,
+  authorize('ADMIN', 'SECRETAIRE'),
+  asyncHandler(clientController.autocompleteClients)
+);
+
+/**
+ * @route   GET /api/clients/:id/bookings
+ * @desc    Récupérer toutes les réservations d'un client
+ * @access  Privé (ADMIN, SECRETAIRE, MASSOTHERAPEUTE, ESTHETICIENNE)
+ */
+router.get(
+  '/:id/bookings',
+  authenticate,
+  asyncHandler(clientController.getClientBookings)
+);
+
+/**
  * @route   GET /api/clients/:id
  * @desc    Récupérer un client par ID
  * @access  Privé (Professionnels uniquement)

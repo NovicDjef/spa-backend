@@ -19,7 +19,9 @@
       "Bash(timeout 10 npm run dev)",
       "Bash(npx tsx:*)",
       "Bash(chmod:*)",
-      "Bash(./verify-services.sh:*)"
+      "Bash(./verify-services.sh:*)",
+      "Bash(find:*)",
+      "Bash(npx prisma format:*)"
     ]
   }
 }

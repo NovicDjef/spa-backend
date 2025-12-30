@@ -1,4 +1,5 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
+import http from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -20,6 +21,7 @@ import bookingRoutes from './modules/bookings/booking.routes';
 import availabilityRoutes from './modules/availability/availability.routes';
 import paymentRoutes from './modules/payments/payment.routes';
 import publicRoutes from './modules/public/public.routes';
+import settingsRoutes from './modules/settings/settings.routes';
 
 // Middleware d'erreur
 import { errorHandler } from './middleware/errorHandler';
@@ -27,9 +29,13 @@ import { errorHandler } from './middleware/errorHandler';
 // Scheduler pour les rappels automatiques
 import { startScheduler } from './lib/scheduler';
 
+// Socket.io pour temps réel
+import { initializeSocket } from './lib/socket';
+
 dotenv.config();
 
 const app: Application = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
 
 // Sécurité
@@ -85,6 +91,9 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('combined'));
 }
 
+// Initialiser Socket.io
+initializeSocket(server);
+
 // Health check
 app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({
@@ -108,6 +117,7 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/calendar', calendarRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/availability', availabilityRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Route 404
 app.use((req: Request, res: Response) => {
@@ -122,7 +132,7 @@ app.use(errorHandler);
 
 // Démarrage du serveur
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
+  server.listen(PORT, () => {
     console.log(`
     ╔════════════════════════════════════════╗
     ║   🌸 API Gestion de Spa - Démarrée   ║

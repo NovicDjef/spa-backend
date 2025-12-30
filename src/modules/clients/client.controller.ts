@@ -500,3 +500,155 @@ export const searchClients = async (req: AuthRequest, res: Response) => {
     data: clients,
   });
 };
+
+/**
+ * @desc    Autocomplete clients (recherche rapide en temps réel)
+ * @route   GET /api/clients/autocomplete
+ * @access  Privé (ADMIN, SECRETAIRE)
+ */
+export const autocompleteClients = async (req: AuthRequest, res: Response) => {
+  const { q } = req.query;
+
+  // Minimum 2 caractères pour déclencher la recherche
+  if (!q || (q as string).length < 2) {
+    return res.json({
+      success: true,
+      data: [],
+    });
+  }
+
+  const clients = await prisma.clientProfile.findMany({
+    where: {
+      OR: [
+        { nom: { contains: q as string, mode: 'insensitive' } },
+        { prenom: { contains: q as string, mode: 'insensitive' } },
+        { telCellulaire: { contains: q as string } },
+        { courriel: { contains: q as string, mode: 'insensitive' } },
+      ],
+    },
+    select: {
+      id: true,
+      nom: true,
+      prenom: true,
+      telCellulaire: true,
+      courriel: true,
+      serviceType: true,
+    },
+    take: 10,
+    orderBy: [{ nom: 'asc' }, { prenom: 'asc' }],
+  });
+
+  return res.json({
+    success: true,
+    data: clients,
+  });
+};
+
+/**
+ * @desc    Récupérer toutes les réservations d'un client (historique complet)
+ * @route   GET /api/clients/:id/bookings
+ * @access  Privé (ADMIN, SECRETAIRE, MASSOTHERAPEUTE, ESTHETICIENNE)
+ */
+export const getClientBookings = async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const { includeHistory = 'true' } = req.query;
+
+  // Vérifier que le client existe
+  const client = await prisma.clientProfile.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      nom: true,
+      prenom: true,
+      courriel: true,
+      telCellulaire: true,
+      serviceType: true,
+    },
+  });
+
+  if (!client) {
+    throw new AppError('Client non trouvé', 404);
+  }
+
+  // Récupérer toutes les réservations du client (par email ou téléphone)
+  const bookings = await prisma.booking.findMany({
+    where: {
+      OR: [
+        { clientEmail: client.courriel },
+        { clientPhone: client.telCellulaire },
+      ],
+    },
+    include: {
+      professional: {
+        select: {
+          id: true,
+          nom: true,
+          prenom: true,
+          role: true,
+        },
+      },
+      service: {
+        select: {
+          id: true,
+          name: true,
+          duration: true,
+          price: true,
+        },
+      },
+      package: {
+        select: {
+          id: true,
+          name: true,
+          variant: true,
+          price: true,
+        },
+      },
+      payment: {
+        select: {
+          id: true,
+          status: true,
+          amount: true,
+          paymentMethod: true,
+        },
+      },
+      ...(includeHistory === 'true'
+        ? {
+            statusHistory: {
+              orderBy: { changedAt: 'desc' as const },
+              take: 5, // Limiter à 5 derniers changements pour chaque booking
+            },
+          }
+        : {}),
+    },
+    orderBy: [{ bookingDate: 'desc' }, { startTime: 'desc' }],
+  });
+
+  // Calculer des statistiques
+  const stats = {
+    total: bookings.length,
+    completed: bookings.filter((b) => b.status === 'COMPLETED').length,
+    cancelled: bookings.filter((b) => b.status === 'CANCELLED').length,
+    noShow: bookings.filter((b) => b.status === 'NO_SHOW').length,
+    upcoming: bookings.filter(
+      (b) =>
+        b.bookingDate >= new Date() &&
+        !['COMPLETED', 'CANCELLED', 'NO_SHOW'].includes(b.status)
+    ).length,
+  };
+
+  return res.json({
+    success: true,
+    data: {
+      client: {
+        id: client.id,
+        nom: client.nom,
+        prenom: client.prenom,
+        courriel: client.courriel,
+        telCellulaire: client.telCellulaire,
+        serviceType: client.serviceType,
+      },
+      bookings,
+      stats,
+    },
+  });
+};

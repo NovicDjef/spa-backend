@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import prisma from '../../config/database';
 import { AuthRequest } from '../auth/auth';
+import { calculateAvailableSlots } from '../availability/availability.service';
 
 /**
  * @desc    Récupérer le calendrier du technicien (vue personnelle)
@@ -226,120 +227,41 @@ export const getAvailableSlots = async (req: AuthRequest, res: Response) => {
 
   const serviceDuration = parseInt(duration as string);
 
-  // Vérifier si le professionnel est bloqué ce jour
-  const blockedAvailability = await prisma.availability.findFirst({
-    where: {
-      professionalId: professionalId as string,
-      date: targetDate,
-      isAvailable: false,
-    },
-  });
+  // Utiliser le service de calcul de disponibilités (30 minutes, template + exceptions)
+  const slots = await calculateAvailableSlots(
+    professionalId as string,
+    targetDate,
+    serviceDuration
+  );
 
-  if (blockedAvailability) {
-    return res.json({
-      success: true,
-      data: {
+  // Vérifier si le jour est bloqué (aucun créneau disponible)
+  const isBlocked = slots.length === 0;
+
+  // Si bloqué, essayer de récupérer la raison
+  let blockReason = null;
+  if (isBlocked) {
+    const blockedAvailability = await prisma.availability.findFirst({
+      where: {
+        professionalId: professionalId as string,
         date: targetDate,
-        isBlocked: true,
-        reason: blockedAvailability.reason,
-        slots: [],
+        isAvailable: false,
       },
     });
+    blockReason = blockedAvailability?.reason || 'Aucun horaire de travail configuré';
   }
 
-  // Récupérer les heures de travail du professionnel
-  const workingHours = await prisma.availability.findFirst({
-    where: {
-      professionalId: professionalId as string,
-      date: targetDate,
-      isAvailable: true,
-    },
-  });
-
-  // Si pas de disponibilité définie, utiliser des heures par défaut
-  const startHour = workingHours?.startTime || '09:00';
-  const endHour = workingHours?.endTime || '17:00';
-
-  // Récupérer toutes les réservations existantes
-  const nextDay = new Date(targetDate);
-  nextDay.setDate(nextDay.getDate() + 1);
-
-  const existingBookings = await prisma.booking.findMany({
-    where: {
-      professionalId: professionalId as string,
-      bookingDate: {
-        gte: targetDate,
-        lt: nextDay,
-      },
-      status: {
-        notIn: ['CANCELLED', 'NO_SHOW'],
-      },
-    },
-    select: {
-      startTime: true,
-      endTime: true,
-    },
-  });
-
-  // Générer les créneaux disponibles
-  const availableSlots = generateAvailableSlots(
-    startHour,
-    endHour,
-    serviceDuration,
-    existingBookings
-  );
+  // Extraire uniquement les créneaux disponibles
+  const availableSlots = slots
+    .filter((slot) => slot.available)
+    .map((slot) => slot.time);
 
   return res.json({
     success: true,
     data: {
       date: targetDate,
-      isBlocked: false,
+      isBlocked,
+      reason: blockReason,
       slots: availableSlots,
     },
   });
 };
-
-// Fonction helper pour générer les créneaux disponibles
-function generateAvailableSlots(
-  startHour: string,
-  endHour: string,
-  duration: number,
-  existingBookings: { startTime: string; endTime: string }[]
-) {
-  const slots: string[] = [];
-
-  // Convertir les heures en minutes
-  const [startH, startM] = startHour.split(':').map(Number);
-  const [endH, endM] = endHour.split(':').map(Number);
-
-  const startMinutes = startH * 60 + startM;
-  const endMinutes = endH * 60 + endM;
-
-  // Générer tous les créneaux possibles (par pas de 15 minutes)
-  for (let time = startMinutes; time + duration <= endMinutes; time += 15) {
-    const slotStart = minutesToTime(time);
-    const slotEnd = minutesToTime(time + duration);
-
-    // Vérifier si le créneau est libre
-    const isAvailable = !existingBookings.some((booking) => {
-      return (
-        (slotStart >= booking.startTime && slotStart < booking.endTime) ||
-        (slotEnd > booking.startTime && slotEnd <= booking.endTime) ||
-        (slotStart <= booking.startTime && slotEnd >= booking.endTime)
-      );
-    });
-
-    if (isAvailable) {
-      slots.push(slotStart);
-    }
-  }
-
-  return slots;
-}
-
-// Convertir des minutes en format HH:MM
-function minutesToTime(minutes: number): string {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
-}

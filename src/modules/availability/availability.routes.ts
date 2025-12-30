@@ -7,6 +7,13 @@ import {
   deleteAvailability,
   createBulkAvailabilities,
 } from './availability.controller';
+import {
+  setWorkingSchedule,
+  getWorkingSchedule,
+  addBreak,
+  getBreaks,
+  deleteBreak,
+} from './working-schedule.controller';
 import { authenticate, authorize } from '../auth/auth';
 import { asyncHandler } from '../../middleware/errorHandler';
 
@@ -82,6 +89,66 @@ router.delete(
   authenticate,
   authorize('ADMIN'),
   asyncHandler(deleteAvailability)
+);
+
+/**
+ * @route   POST /api/availability/working-schedule
+ * @desc    Définir les horaires de travail hebdomadaires d'un professionnel
+ * @access  Privé (ADMIN uniquement)
+ */
+router.post(
+  '/working-schedule',
+  authenticate,
+  authorize('ADMIN'),
+  asyncHandler(setWorkingSchedule)
+);
+
+/**
+ * @route   GET /api/availability/working-schedule/:professionalId
+ * @desc    Récupérer les horaires de travail hebdomadaires d'un professionnel
+ * @access  Privé (ADMIN, SECRETAIRE)
+ */
+router.get(
+  '/working-schedule/:professionalId',
+  authenticate,
+  authorize('ADMIN', 'SECRETAIRE'),
+  asyncHandler(getWorkingSchedule)
+);
+
+/**
+ * @route   POST /api/availability/breaks
+ * @desc    Ajouter une pause pour un professionnel
+ * @access  Privé (ADMIN uniquement)
+ */
+router.post(
+  '/breaks',
+  authenticate,
+  authorize('ADMIN'),
+  asyncHandler(addBreak)
+);
+
+/**
+ * @route   GET /api/availability/breaks/:professionalId
+ * @desc    Récupérer toutes les pauses d'un professionnel
+ * @access  Privé (ADMIN, SECRETAIRE)
+ */
+router.get(
+  '/breaks/:professionalId',
+  authenticate,
+  authorize('ADMIN', 'SECRETAIRE'),
+  asyncHandler(getBreaks)
+);
+
+/**
+ * @route   DELETE /api/availability/breaks/:id
+ * @desc    Supprimer (désactiver) une pause
+ * @access  Privé (ADMIN uniquement)
+ */
+router.delete(
+  '/breaks/:id',
+  authenticate,
+  authorize('ADMIN'),
+  asyncHandler(deleteBreak)
 );
 
 export default router;

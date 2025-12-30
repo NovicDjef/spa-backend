@@ -32,13 +32,13 @@ enum Gender {
 
 // Énumération des statuts de réservation
 enum BookingStatus {
-  PENDING           // Réservation créée (en attente)
-  CONFIRMED         // Réservation confirmée
-  CLIENT_ARRIVED    // Client est arrivé
-  IN_PROGRESS       // Service en cours
-  COMPLETED         // Service terminé
-  NO_SHOW           // Client absent
-  CANCELLED         // Réservation annulée
+  PENDING // Réservation créée (en attente)
+  CONFIRMED // Réservation confirmée
+  CLIENT_ARRIVED // Client est arrivé
+  IN_PROGRESS // Service en cours
+  COMPLETED // Service terminé
+  NO_SHOW // Client absent
+  CANCELLED // Réservation annulée
 }
 
 // Énumération des statuts de paiement
@@ -72,24 +72,36 @@ enum DiscountType {
   FIXED_AMOUNT
 }
 
+// Énumération des types de notification
+enum NotificationType {
+  BOOKING_REMINDER
+  BOOKING_CONFIRMED
+  BOOKING_CANCELLED
+  BOOKING_UPDATED
+  BOOKING_ASSIGNED
+}
+
 // Table des utilisateurs (EMPLOYÉS uniquement - avec authentification)
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
   telephone String   @unique
-  password  String   // Hash bcrypt
+  password  String // Hash bcrypt
   role      UserRole
   nom       String?
   prenom    String?
-  photoUrl  String?  // Photo du technicien pour le calendrier
+  photoUrl  String? // Photo du technicien pour le calendrier
   isActive  Boolean  @default(true) // Permet à l'ADMIN de bloquer/débloquer un employé
 
   // Relations
-  notesCreated            Note[]
-  assignedClients         Assignment[]
-  reviewsReceived         Review[]        @relation("ReceivedReviews")
-  bookingsAsProfessional  Booking[]
-  availabilities          Availability[]
+  notesCreated           Note[]
+  assignedClients        Assignment[]
+  reviewsReceived        Review[]          @relation("ReceivedReviews")
+  bookingsAsProfessional Booking[]
+  bookingsCreated        Booking[]         @relation("BookingCreator")
+  availabilities         Availability[]
+  workingSchedules       WorkingSchedule[]
+  breaks                 BreakPeriod[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -104,42 +116,42 @@ model ClientProfile {
   id String @id @default(cuid())
 
   // Informations personnelles
-  nom              String
-  prenom           String
-  adresse          String
-  ville            String
-  codePostal       String
-  telMaison        String?
-  telBureau        String?
-  telCellulaire    String   @unique
-  courriel         String   @unique
-  dateNaissance    DateTime
-  occupation       String?
-  gender           Gender
-  serviceType      ServiceType
-  assuranceCouvert Boolean
-  autreMaladie     Boolean?
+  nom                 String
+  prenom              String
+  adresse             String
+  ville               String
+  codePostal          String
+  telMaison           String?
+  telBureau           String?
+  telCellulaire       String      @unique
+  courriel            String      @unique
+  dateNaissance       DateTime
+  occupation          String?
+  gender              Gender
+  serviceType         ServiceType
+  assuranceCouvert    Boolean
+  autreMaladie        Boolean?
   autreMaladieDetails String?
 
   // INFORMATIONS MASSOTHÉRAPIE
-  raisonConsultation              String?
-  diagnosticMedical               Boolean?
-  diagnosticMedicalDetails        String?
-  medicaments                     Boolean?
-  medicamentsDetails              String?
-  accidents                       Boolean?
-  accidentsDetails                String?
-  operationsChirurgicales         Boolean?
-  operationsChirurgicalesDetails  String?
-  traitementsActuels              String?
-  problemesCardiaques             Boolean   @default(false)
-  problemesCardiaquesDetails      String?
-  maladiesGraves                  Boolean   @default(false)
-  maladiesGravesDetails           String?
-  ortheses                        Boolean   @default(false)
-  orthesesDetails                 String?
-  allergies                       Boolean   @default(false)
-  allergiesDetails                String?
+  raisonConsultation             String?
+  diagnosticMedical              Boolean?
+  diagnosticMedicalDetails       String?
+  medicaments                    Boolean?
+  medicamentsDetails             String?
+  accidents                      Boolean?
+  accidentsDetails               String?
+  operationsChirurgicales        Boolean?
+  operationsChirurgicalesDetails String?
+  traitementsActuels             String?
+  problemesCardiaques            Boolean  @default(false)
+  problemesCardiaquesDetails     String?
+  maladiesGraves                 Boolean  @default(false)
+  maladiesGravesDetails          String?
+  ortheses                       Boolean  @default(false)
+  orthesesDetails                String?
+  allergies                      Boolean  @default(false)
+  allergiesDetails               String?
 
   // Conditions médicales (massothérapie)
   raideurs              Boolean @default(false)
@@ -180,31 +192,31 @@ model ClientProfile {
   autres                String?
 
   // NOUVEAUX CHAMPS pour tracking des emails
-  lastVisitDate         DateTime?
-  lastEmailSent         DateTime?
-  feedbackEmailsSent    Int       @default(0)
-  promoEmailsSent       Int       @default(0)
+  lastVisitDate      DateTime?
+  lastEmailSent      DateTime?
+  feedbackEmailsSent Int       @default(0)
+  promoEmailsSent    Int       @default(0)
 
   // Zones de douleur (massothérapie)
   zonesDouleur String[] // Array de strings
 
   // INFORMATIONS ESTHÉTIQUE
-  etatPeau            String?
-  etatPores           String?
-  coucheCornee        String?
-  irrigationSanguine  String?
-  impuretes           String?
-  sensibiliteCutanee  String?
-  fumeur              String?
-  niveauStress        String?
-  expositionSoleil    String?
-  protectionSolaire   String?
-  suffisanceEau       String?
-  travailExterieur    String?
-  bainChauds          String?
-  routineSoins        String?
-  changementsRecents  String?
-  preferencePeau      String?
+  etatPeau              String?
+  etatPores             String?
+  coucheCornee          String?
+  irrigationSanguine    String?
+  impuretes             String?
+  sensibiliteCutanee    String?
+  fumeur                String?
+  niveauStress          String?
+  expositionSoleil      String?
+  protectionSolaire     String?
+  suffisanceEau         String?
+  travailExterieur      String?
+  bainChauds            String?
+  routineSoins          String?
+  changementsRecents    String?
+  preferencePeau        String?
   diagnosticVisuelNotes String?
 
   // Relations
@@ -222,29 +234,29 @@ model ClientProfile {
 
 // 3. Nouvelle table pour les feedbacks clients (séparée de Review employés)
 model ClientFeedback {
-  id            String   @id @default(cuid())
-  token         String   @unique  // Pour le lien sécurisé
-  
+  id    String @id @default(cuid())
+  token String @unique // Pour le lien sécurisé
+
   // Lien avec la note qui a déclenché l'email
-  noteId        String   @unique
-  
+  noteId String @unique
+
   // Le client (optionnel pour garder anonyme si souhaité)
-  clientEmail   String?
-  clientName    String?
-  
+  clientEmail String?
+  clientName  String?
+
   // Le feedback sur la séance
-  rating        Int?     // 1-5 (null si pas encore répondu)
-  comment       String?  @db.Text
-  
+  rating  Int? // 1-5 (null si pas encore répondu)
+  comment String? @db.Text
+
   // Recommandations/suggestions
-  wouldReturn   Boolean?
+  wouldReturn    Boolean?
   wouldRecommend Boolean?
-  
+
   // Métadonnées
-  hasResponded  Boolean  @default(false)
-  respondedAt   DateTime?
-  createdAt     DateTime @default(now())
-  
+  hasResponded Boolean   @default(false)
+  respondedAt  DateTime?
+  createdAt    DateTime  @default(now())
+
   @@index([token])
   @@index([noteId])
   @@index([hasResponded])
@@ -252,31 +264,32 @@ model ClientFeedback {
 }
 
 model EmailLog {
-  id            String   @id @default(cuid())
-  type          String   // "FEEDBACK", "PROMO", etc.
-  
+  id   String @id @default(cuid())
+  type String // "FEEDBACK", "PROMO", etc.
+
   // Destinataire
-  clientEmail   String
-  clientName    String?
-  
+  clientEmail String
+  clientName  String?
+
   // Contenu
-  subject       String
-  htmlContent   String   @db.Text
-  
+  subject     String
+  htmlContent String @db.Text
+
   // Lié à quelle note/promo ?
-  noteId        String?
-  promotionId   String?
-  
+  noteId      String?
+  promotionId String?
+
   // Tracking
-  sentAt        DateTime @default(now())
-  opened        Boolean  @default(false)
-  clicked       Boolean  @default(false)
-  
+  sentAt  DateTime @default(now())
+  opened  Boolean  @default(false)
+  clicked Boolean  @default(false)
+
   @@index([clientEmail])
   @@index([type])
   @@index([sentAt])
   @@index([noteId])
 }
+
 // Table des notes de traitement
 model Note {
   id      String @id @default(cuid())
@@ -289,10 +302,10 @@ model Note {
   authorId String
   author   User   @relation(fields: [authorId], references: [id])
 
-// NOUVEAUX CHAMPS pour l'automatisation
-  emailSent       Boolean   @default(false)  // Email de remerciement envoyé ?
-  emailSentAt     DateTime? // Quand ?
-  feedbackToken   String?   @unique // Token pour le lien de feedback
+  // NOUVEAUX CHAMPS pour l'automatisation
+  emailSent     Boolean   @default(false) // Email de remerciement envoyé ?
+  emailSentAt   DateTime? // Quand ?
+  feedbackToken String?   @unique // Token pour le lien de feedback
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -300,7 +313,7 @@ model Note {
   @@index([clientId])
   @@index([authorId])
   @@index([createdAt])
-  @@index([emailSent])  // NOUVEAU - pour filtrer rapidement
+  @@index([emailSent]) // NOUVEAU - pour filtrer rapidement
 }
 
 // Table d'assignation des clients aux professionnels
@@ -326,17 +339,17 @@ model Assignment {
 
 // Table des avis pour les professionnels
 model Review {
-  id              String   @id @default(cuid())
-  rating          Int      // 1-5
-  comment         String?  @db.Text
+  id      String  @id @default(cuid())
+  rating  Int // 1-5
+  comment String? @db.Text
 
   // Relation avec le professionnel
-  professionalId  String
-  professional    User     @relation("ReceivedReviews", fields: [professionalId], references: [id], onDelete: Cascade)
+  professionalId String
+  professional   User   @relation("ReceivedReviews", fields: [professionalId], references: [id], onDelete: Cascade)
 
   // Métadonnées
-  isAnonymous     Boolean  @default(true)
-  createdAt       DateTime @default(now())
+  isAnonymous Boolean  @default(true)
+  createdAt   DateTime @default(now())
 
   // Index pour performance
   @@index([professionalId])
@@ -349,16 +362,16 @@ model Review {
 
 // Catégories de services (Massothérapie, Esthétique, etc.)
 model ServiceCategory {
-  id          String    @id @default(cuid())
-  name        String    @unique
-  description String?   @db.Text
-  displayOrder Int      @default(0)
-  isActive    Boolean   @default(true)
+  id           String  @id @default(cuid())
+  name         String  @unique
+  description  String? @db.Text
+  displayOrder Int     @default(0)
+  isActive     Boolean @default(true)
 
-  services    Service[]
+  services Service[]
 
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([isActive])
   @@index([displayOrder])
@@ -366,20 +379,20 @@ model ServiceCategory {
 
 // Services individuels (massages, soins, etc.)
 model Service {
-  id              String          @id @default(cuid())
-  name            String
-  slug            String          @unique
-  description     String?         @db.Text
-  duration        Int             // Durée en minutes
-  price           Decimal         @db.Decimal(10, 2)  // Prix AVANT taxes
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  description String? @db.Text
+  duration    Int // Durée en minutes
+  price       Decimal @db.Decimal(10, 2) // Prix AVANT taxes
 
-  categoryId      String
-  category        ServiceCategory @relation(fields: [categoryId], references: [id])
+  categoryId String
+  category   ServiceCategory @relation(fields: [categoryId], references: [id])
 
-  imageUrl        String?
-  displayOrder    Int             @default(0)
-  isActive        Boolean         @default(true)
-  requiresProfessional Boolean     @default(true)
+  imageUrl             String?
+  displayOrder         Int     @default(0)
+  isActive             Boolean @default(true)
+  requiresProfessional Boolean @default(true)
 
   // Relations
   bookings        Booking[]
@@ -396,23 +409,23 @@ model Service {
 
 // Forfaits/Packages (combinaisons de services)
 model Package {
-  id              String   @id @default(cuid())
-  name            String
-  slug            String   @unique
-  description     String?  @db.Text
-  price           Decimal  @db.Decimal(10, 2)
-  originalPrice   Decimal? @db.Decimal(10, 2)
-  discount        Decimal? @db.Decimal(5, 2)
-  variant         String?  // "Petite", "Grande", "Extra nuitée"
+  id            String   @id @default(cuid())
+  name          String
+  slug          String   @unique
+  description   String?  @db.Text
+  price         Decimal  @db.Decimal(10, 2)
+  originalPrice Decimal? @db.Decimal(10, 2)
+  discount      Decimal? @db.Decimal(5, 2)
+  variant       String? // "Petite", "Grande", "Extra nuitée"
 
-  imageUrl        String?
-  displayOrder    Int      @default(0)
-  isActive        Boolean  @default(true)
+  imageUrl     String?
+  displayOrder Int     @default(0)
+  isActive     Boolean @default(true)
 
   // Services inclus
-  services        PackageService[]
-  bookings        Booking[]
-  promotions      PackagePromotion[]
+  services   PackageService[]
+  bookings   Booking[]
+  promotions PackagePromotion[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -444,29 +457,29 @@ model PackageService {
 
 // Paiements via Stripe
 model Payment {
-  id                String         @id @default(cuid())
+  id String @id @default(cuid())
 
   // Stripe (Optional pour les réservations manuelles - sera rempli lors du paiement réel)
-  stripePaymentId   String?        @unique
-  stripeCustomerId  String?
+  stripePaymentId  String? @unique
+  stripeCustomerId String?
 
   // Montants
-  amount            Decimal        @db.Decimal(10, 2)
-  currency          String         @default("CAD")
+  amount   Decimal @db.Decimal(10, 2)
+  currency String  @default("CAD")
 
   // Statut
-  status            PaymentStatus  @default(PENDING)
+  status PaymentStatus @default(PENDING)
 
   // Métadonnées
-  paymentMethod     String?
-  receiptUrl        String?
-  receiptPdfUrl     String?
+  paymentMethod String?
+  receiptUrl    String?
+  receiptPdfUrl String?
 
   // Relations (une seule sera remplie)
-  booking           Booking?
-  order             Order?
-  giftCard          GiftCard?
-  gymSubscription   GymSubscription?
+  booking         Booking?
+  order           Order?
+  giftCard        GiftCard?
+  gymSubscription GymSubscription?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -481,56 +494,63 @@ model Payment {
 
 // Réservations de services
 model Booking {
-  id              String        @id @default(cuid())
-  bookingNumber   String        @unique
+  id            String @id @default(cuid())
+  bookingNumber String @unique
 
   // Type de réservation
-  type            BookingType
+  type BookingType
 
   // Service ou Package
-  serviceId       String?
-  service         Service?      @relation(fields: [serviceId], references: [id])
-  packageId       String?
-  package         Package?      @relation(fields: [packageId], references: [id])
+  serviceId String?
+  service   Service? @relation(fields: [serviceId], references: [id])
+  packageId String?
+  package   Package? @relation(fields: [packageId], references: [id])
 
   // Client
-  clientEmail     String
-  clientName      String
-  clientPhone     String
-  specialNotes    String?       @db.Text
+  clientEmail  String
+  clientName   String
+  clientPhone  String
+  specialNotes String? @db.Text
 
   // Date et heure
-  bookingDate     DateTime      @db.Date
-  startTime       String        // "09:00"
-  endTime         String        // "10:30"
+  bookingDate DateTime @db.Date
+  startTime   String // "09:00"
+  endTime     String // "10:30"
 
   // Professionnel assigné
-  professionalId  String?
-  professional    User?         @relation(fields: [professionalId], references: [id])
+  professionalId String?
+  professional   User?   @relation(fields: [professionalId], references: [id])
 
   // Montants
-  subtotal        Decimal       @db.Decimal(10, 2)
-  taxTPS          Decimal       @db.Decimal(10, 2)
-  taxTVQ          Decimal       @db.Decimal(10, 2)
-  total           Decimal       @db.Decimal(10, 2)
+  subtotal Decimal @db.Decimal(10, 2)
+  taxTPS   Decimal @db.Decimal(10, 2)
+  taxTVQ   Decimal @db.Decimal(10, 2)
+  total    Decimal @db.Decimal(10, 2)
 
   // Carte cadeau utilisée
-  giftCardId      String?
-  giftCard        GiftCard?     @relation(fields: [giftCardId], references: [id])
-  giftCardAmount  Decimal?      @db.Decimal(10, 2)
+  giftCardId     String?
+  giftCard       GiftCard? @relation(fields: [giftCardId], references: [id])
+  giftCardAmount Decimal?  @db.Decimal(10, 2)
 
   // Statut
-  status          BookingStatus @default(PENDING)
+  status BookingStatus @default(PENDING)
 
   // Paiement
-  paymentId       String        @unique
-  payment         Payment       @relation(fields: [paymentId], references: [id])
+  paymentId String  @unique
+  payment   Payment @relation(fields: [paymentId], references: [id])
 
   // Rappel
-  reminderSent    Boolean       @default(false)
+  reminderSent Boolean @default(false)
 
   // Google Calendar
   googleCalendarEventId String?
+
+  // Créateur de la réservation (admin/réceptionniste)
+  createdById String?
+  createdBy   User?   @relation("BookingCreator", fields: [createdById], references: [id])
+
+  // Historique des modifications
+  statusHistory BookingStatusHistory[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -540,29 +560,30 @@ model Booking {
   @@index([bookingDate])
   @@index([professionalId])
   @@index([status])
+  @@index([createdById])
 }
 
 // Disponibilités des professionnels
 model Availability {
-  id             String   @id @default(cuid())
+  id             String @id @default(cuid())
   professionalId String
-  professional   User     @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  professional   User   @relation(fields: [professionalId], references: [id], onDelete: Cascade)
 
   // Date et heures
-  date           DateTime @db.Date
-  startTime      String?   // "09:00" - Optional quand isAvailable = false (bloqué)
-  endTime        String?   // "17:00" - Optional quand isAvailable = false (bloqué)
+  date      DateTime @db.Date
+  startTime String? // "09:00" - Optional quand isAvailable = false (bloqué)
+  endTime   String? // "17:00" - Optional quand isAvailable = false (bloqué)
 
   // Statut
-  isAvailable    Boolean  @default(true)
-  reason         String?  // "VACATION", "SICK", "BOOKED", etc.
+  isAvailable Boolean @default(true)
+  reason      String? // "VACATION", "SICK", "BOOKED", etc.
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([professionalId, date])
   @@index([professionalId])
   @@index([date])
-  @@unique([professionalId, date])
 }
 
 // ============================================
@@ -570,24 +591,24 @@ model Availability {
 // ============================================
 
 model GiftCard {
-  id             String    @id @default(cuid())
-  code           String    @unique
-  amount         Decimal   @db.Decimal(10, 2)
-  balance        Decimal   @db.Decimal(10, 2)
+  id      String  @id @default(cuid())
+  code    String  @unique
+  amount  Decimal @db.Decimal(10, 2)
+  balance Decimal @db.Decimal(10, 2)
 
   // Acheteur et destinataire
   purchasedBy    String?
   recipientName  String?
   recipientEmail String?
-  message        String?   @db.Text
+  message        String? @db.Text
 
   // Statut
-  isActive       Boolean   @default(true)
-  expiresAt      DateTime?
+  isActive  Boolean   @default(true)
+  expiresAt DateTime?
 
   // Paiement
-  paymentId      String    @unique
-  payment        Payment   @relation(fields: [paymentId], references: [id])
+  paymentId String  @unique
+  payment   Payment @relation(fields: [paymentId], references: [id])
 
   // Utilisation
   usedInBookings Booking[]
@@ -604,14 +625,14 @@ model GiftCard {
 // ============================================
 
 model GymMembership {
-  id            String   @id @default(cuid())
-  type          String   @unique // "1_DAY", "1_MONTH", "3_MONTHS", etc.
-  name          String
-  price         Decimal  @db.Decimal(10, 2)
-  duration      Int      // Durée en jours
-  description   String?  @db.Text
-  displayOrder  Int      @default(0)
-  isActive      Boolean  @default(true)
+  id           String  @id @default(cuid())
+  type         String  @unique // "1_DAY", "1_MONTH", "3_MONTHS", etc.
+  name         String
+  price        Decimal @db.Decimal(10, 2)
+  duration     Int // Durée en jours
+  description  String? @db.Text
+  displayOrder Int     @default(0)
+  isActive     Boolean @default(true)
 
   subscriptions GymSubscription[]
 
@@ -628,18 +649,18 @@ model GymSubscription {
   membership   GymMembership @relation(fields: [membershipId], references: [id])
 
   // Informations client
-  clientEmail  String
-  clientName   String
-  clientPhone  String
+  clientEmail String
+  clientName  String
+  clientPhone String
 
   // Dates
-  startDate    DateTime
-  endDate      DateTime
-  isActive     Boolean       @default(true)
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(true)
 
   // Paiement
-  paymentId    String        @unique
-  payment      Payment       @relation(fields: [paymentId], references: [id])
+  paymentId String  @unique
+  payment   Payment @relation(fields: [paymentId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -655,20 +676,20 @@ model GymSubscription {
 // ============================================
 
 model Product {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  description String?  @db.Text
-  price       Decimal  @db.Decimal(10, 2)
-  stock       Int      @default(0)
-  category    String?
-  imageUrl    String?
+  id           String  @id @default(cuid())
+  name         String
+  slug         String  @unique
+  description  String? @db.Text
+  price        Decimal @db.Decimal(10, 2)
+  stock        Int     @default(0)
+  category     String?
+  imageUrl     String?
   displayOrder Int     @default(0)
-  isActive    Boolean  @default(true)
+  isActive     Boolean @default(true)
 
   // Relations
-  orderItems  OrderItem[]
-  promotions  ProductPromotion[]
+  orderItems OrderItem[]
+  promotions ProductPromotion[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -679,32 +700,32 @@ model Product {
 }
 
 model Order {
-  id              String      @id @default(cuid())
-  orderNumber     String      @unique
+  id          String @id @default(cuid())
+  orderNumber String @unique
 
   // Client
-  clientEmail     String
-  clientName      String
-  clientPhone     String
+  clientEmail String
+  clientName  String
+  clientPhone String
 
   // Livraison
-  shippingAddress String?     @db.Text
+  shippingAddress String? @db.Text
 
   // Montants
-  subtotal        Decimal     @db.Decimal(10, 2)
-  taxTPS          Decimal     @db.Decimal(10, 2)
-  taxTVQ          Decimal     @db.Decimal(10, 2)
-  total           Decimal     @db.Decimal(10, 2)
+  subtotal Decimal @db.Decimal(10, 2)
+  taxTPS   Decimal @db.Decimal(10, 2)
+  taxTVQ   Decimal @db.Decimal(10, 2)
+  total    Decimal @db.Decimal(10, 2)
 
   // Statut
-  status          OrderStatus @default(PENDING)
+  status OrderStatus @default(PENDING)
 
   // Paiement
-  paymentId       String      @unique
-  payment         Payment     @relation(fields: [paymentId], references: [id])
+  paymentId String  @unique
+  payment   Payment @relation(fields: [paymentId], references: [id])
 
   // Items
-  items           OrderItem[]
+  items OrderItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -734,26 +755,26 @@ model OrderItem {
 // ============================================
 
 model Promotion {
-  id            String       @id @default(cuid())
-  name          String
-  description   String?      @db.Text
-  code          String?      @unique
+  id          String  @id @default(cuid())
+  name        String
+  description String? @db.Text
+  code        String? @unique
 
   // Type de réduction
   discountType  DiscountType
   discountValue Decimal      @db.Decimal(10, 2)
 
   // Dates
-  startDate     DateTime
-  endDate       DateTime
+  startDate DateTime
+  endDate   DateTime
 
   // Statut
-  isActive      Boolean      @default(true)
+  isActive Boolean @default(true)
 
   // Relations
-  services      ServicePromotion[]
-  packages      PackagePromotion[]
-  products      ProductPromotion[]
+  services ServicePromotion[]
+  packages PackagePromotion[]
+  products ProductPromotion[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -764,11 +785,11 @@ model Promotion {
 }
 
 model ServicePromotion {
-  id          String     @id @default(cuid())
+  id          String    @id @default(cuid())
   promotionId String
-  promotion   Promotion  @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
   serviceId   String
-  service     Service    @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  service     Service   @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
@@ -778,11 +799,11 @@ model ServicePromotion {
 }
 
 model PackagePromotion {
-  id          String     @id @default(cuid())
+  id          String    @id @default(cuid())
   promotionId String
-  promotion   Promotion  @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
   packageId   String
-  package     Package    @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  package     Package   @relation(fields: [packageId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
@@ -792,15 +813,136 @@ model PackagePromotion {
 }
 
 model ProductPromotion {
-  id          String     @id @default(cuid())
+  id          String    @id @default(cuid())
   promotionId String
-  promotion   Promotion  @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
   productId   String
-  product     Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
   @@unique([promotionId, productId])
   @@index([promotionId])
   @@index([productId])
+}
+
+// ============================================
+// SYSTÈME DE CALENDRIER ET TRAÇABILITÉ
+// ============================================
+
+// Historique des changements de statut des réservations
+model BookingStatusHistory {
+  id        String  @id @default(cuid())
+  bookingId String
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  oldStatus BookingStatus?
+  newStatus BookingStatus
+
+  changedById   String
+  changedBy     String // Nom complet de l'utilisateur
+  changedByRole String // ADMIN, SECRETAIRE, etc.
+
+  reason String? @db.Text
+  notes  String? @db.Text
+
+  // Pour drag & drop - changements de date/heure/technicien
+  oldDate           DateTime? @db.Date
+  newDate           DateTime? @db.Date
+  oldStartTime      String?
+  newStartTime      String?
+  oldEndTime        String?
+  newEndTime        String?
+  oldProfessionalId String?
+  newProfessionalId String?
+
+  changedAt DateTime @default(now())
+
+  @@index([bookingId])
+  @@index([changedAt])
+  @@map("booking_status_history")
+}
+
+// Horaires de travail hebdomadaires (template)
+model WorkingSchedule {
+  id             String @id @default(cuid())
+  professionalId String
+  professional   User   @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  dayOfWeek Int // 0 = Dimanche, 1 = Lundi, ..., 6 = Samedi
+  startTime String // "09:00"
+  endTime   String // "17:00"
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([professionalId, dayOfWeek])
+  @@index([professionalId])
+  @@index([isActive])
+  @@map("working_schedules")
+}
+
+// Périodes de pause récurrentes
+model BreakPeriod {
+  id             String @id @default(cuid())
+  professionalId String
+  professional   User   @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  dayOfWeek Int? // null = tous les jours, 0-6 = jour spécifique
+  startTime String // "12:00"
+  endTime   String // "13:00"
+
+  label    String? // "Lunch", "Pause café", etc.
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([professionalId])
+  @@index([isActive])
+  @@map("break_periods")
+}
+
+// Notifications et rappels
+model Notification {
+  id   String           @id @default(cuid())
+  type NotificationType
+
+  recipientEmail String
+  recipientName  String?
+
+  bookingId String?
+
+  subject String
+  message String @db.Text
+
+  sent   Boolean   @default(false)
+  sentAt DateTime?
+  error  String?   @db.Text
+
+  scheduledFor DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([recipientEmail])
+  @@index([bookingId])
+  @@index([sent])
+  @@index([scheduledFor])
+  @@index([type])
+  @@map("notifications")
+}
+
+// Configuration système
+model SystemSettings {
+  id          String  @id @default(cuid())
+  key         String  @unique
+  value       String  @db.Text
+  description String? @db.Text
+
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+  @@map("system_settings")
 }
