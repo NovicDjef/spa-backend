@@ -1,4 +1,4 @@
-# ✅ Configuration SendGrid - Spa Renaissance
+<!-- # ✅ Configuration SendGrid - Spa Renaissance
 
 ## 🔑 Clé API Configurée
 
@@ -244,4 +244,4 @@ Si vous voyez cette erreur :
 
 ---
 
-**✅ SendGrid est configuré ! Il ne reste qu'à vérifier l'adresse email et tester l'envoi.**
+**✅ SendGrid est configuré ! Il ne reste qu'à vérifier l'adresse email et tester l'envoi.** -->
