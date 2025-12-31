@@ -173,33 +173,73 @@ export const createClient = async (req: Request, res: Response) => {
   const validatedData = createClientSchema.parse(req.body);
 
   // Vérifier si un client avec le même email existe déjà POUR LE MÊME TYPE DE SERVICE
-  const existingEmailForServiceType = await prisma.clientProfile.findFirst({
+  const existingEmailForServiceType = await prisma.clientProfile.findUnique({
     where: {
-      courriel: validatedData.courriel,
-      serviceType: validatedData.serviceType,
-    },
+      courriel_serviceType: {
+        courriel: validatedData.courriel,
+        serviceType: validatedData.serviceType
+      }
+    }
   });
 
   if (existingEmailForServiceType) {
-    throw new AppError(
-      `Cet email est déjà utilisé pour un dossier ${validatedData.serviceType === 'MASSOTHERAPIE' ? 'de massothérapie' : 'd\'esthétique'}`,
-      400
-    );
+    // Vérifier si l'utilisateur a déjà un compte avec l'autre type de service
+    const otherServiceType = validatedData.serviceType === 'MASSOTHERAPIE' ? 'ESTHETIQUE' : 'MASSOTHERAPIE';
+    const existingWithOtherService = await prisma.clientProfile.findUnique({
+      where: {
+        courriel_serviceType: {
+          courriel: validatedData.courriel,
+          serviceType: otherServiceType
+        }
+      }
+    });
+
+    if (existingWithOtherService) {
+      throw new AppError(
+        `Vous avez déjà un compte avec cette adresse email pour un dossier ${otherServiceType === 'MASSOTHERAPIE' ? 'de massothérapie' : 'd\'esthétique'}. Vous pouvez utiliser la même adresse email pour les deux types de services.`,
+        400
+      );
+    } else {
+      throw new AppError(
+        `Cette adresse email est déjà utilisée pour un dossier ${validatedData.serviceType === 'MASSOTHERAPIE' ? 'de massothérapie' : 'd\'esthétique'}. Si c'est vous, veuillez utiliser une autre adresse email ou vous connecter à votre compte existant.`,
+        400
+      );
+    }
   }
 
   // Vérifier si un client avec le même téléphone existe déjà POUR LE MÊME TYPE DE SERVICE
-  const existingPhoneForServiceType = await prisma.clientProfile.findFirst({
+  const existingPhoneForServiceType = await prisma.clientProfile.findUnique({
     where: {
-      telCellulaire: validatedData.telCellulaire,
-      serviceType: validatedData.serviceType,
-    },
+      telCellulaire_serviceType: {
+        telCellulaire: validatedData.telCellulaire,
+        serviceType: validatedData.serviceType
+      }
+    }
   });
 
   if (existingPhoneForServiceType) {
-    throw new AppError(
-      `Ce numéro de téléphone est déjà utilisé pour un dossier ${validatedData.serviceType === 'MASSOTHERAPIE' ? 'de massothérapie' : 'd\'esthétique'}`,
-      400
-    );
+    // Vérifier si l'utilisateur a déjà un compte avec l'autre type de service
+    const otherServiceType = validatedData.serviceType === 'MASSOTHERAPIE' ? 'ESTHETIQUE' : 'MASSOTHERAPIE';
+    const existingPhoneWithOtherService = await prisma.clientProfile.findUnique({
+      where: {
+        telCellulaire_serviceType: {
+          telCellulaire: validatedData.telCellulaire,
+          serviceType: otherServiceType
+        }
+      }
+    });
+
+    if (existingPhoneWithOtherService) {
+      throw new AppError(
+        `Vous avez déjà un compte avec ce numéro de téléphone pour un dossier ${otherServiceType === 'MASSOTHERAPIE' ? 'de massothérapie' : 'd\'esthétique'}. Vous pouvez utiliser le même numéro pour les deux types de services.`,
+        400
+      );
+    } else {
+      throw new AppError(
+        `Ce numéro de téléphone est déjà utilisé pour un dossier ${validatedData.serviceType === 'MASSOTHERAPIE' ? 'de massothérapie' : 'd\'esthétique'}. Si c'est vous, veuillez utiliser un autre numéro ou vous connecter à votre compte existant.`,
+        400
+      );
+    }
   }
 
   // Créer le profil client directement (SANS User)
@@ -471,6 +511,23 @@ export const updateClient = async (req: AuthRequest, res: Response) => {
 
   if (!existingClient) {
     throw new AppError('Client non trouvé', 404);
+  }
+
+  // Vérifier si un client avec le même courriel et type de service existe déjà
+  const existingClientByEmail = await prisma.clientProfile.findUnique({
+    where: {
+      courriel_serviceType: {
+        courriel: req.body.courriel,
+        serviceType: req.body.serviceType
+      }
+    }
+  });
+
+  if (existingClientByEmail) {
+    throw new AppError(
+      `Un client avec l'email ${req.body.courriel} existe déjà pour un dossier ${req.body.serviceType === 'MASSOTHERAPIE' ? 'de massothérapie' : 'd\'esthétique'}`,
+      400
+    );
   }
 
   // Mettre à jour
