@@ -173,24 +173,20 @@ export const createClient = async (req: Request, res: Response) => {
   const validatedData = createClientSchema.parse(req.body);
 
   // Vérifier si un client avec le même email existe déjà POUR LE MÊME TYPE DE SERVICE
-  const existingEmailForServiceType = await prisma.clientProfile.findUnique({
+  const existingEmailForServiceType = await prisma.clientProfile.findFirst({
     where: {
-      courriel_serviceType: {
-        courriel: validatedData.courriel,
-        serviceType: validatedData.serviceType
-      }
+      courriel: validatedData.courriel,
+      serviceType: validatedData.serviceType
     }
   });
 
   if (existingEmailForServiceType) {
     // Vérifier si l'utilisateur a déjà un compte avec l'autre type de service
     const otherServiceType = validatedData.serviceType === 'MASSOTHERAPIE' ? 'ESTHETIQUE' : 'MASSOTHERAPIE';
-    const existingWithOtherService = await prisma.clientProfile.findUnique({
+    const existingWithOtherService = await prisma.clientProfile.findFirst({
       where: {
-        courriel_serviceType: {
-          courriel: validatedData.courriel,
-          serviceType: otherServiceType
-        }
+        courriel: validatedData.courriel,
+        serviceType: otherServiceType
       }
     });
 
@@ -208,24 +204,20 @@ export const createClient = async (req: Request, res: Response) => {
   }
 
   // Vérifier si un client avec le même téléphone existe déjà POUR LE MÊME TYPE DE SERVICE
-  const existingPhoneForServiceType = await prisma.clientProfile.findUnique({
+  const existingPhoneForServiceType = await prisma.clientProfile.findFirst({
     where: {
-      telCellulaire_serviceType: {
-        telCellulaire: validatedData.telCellulaire,
-        serviceType: validatedData.serviceType
-      }
+      telCellulaire: validatedData.telCellulaire,
+      serviceType: validatedData.serviceType
     }
   });
 
   if (existingPhoneForServiceType) {
     // Vérifier si l'utilisateur a déjà un compte avec l'autre type de service
     const otherServiceType = validatedData.serviceType === 'MASSOTHERAPIE' ? 'ESTHETIQUE' : 'MASSOTHERAPIE';
-    const existingPhoneWithOtherService = await prisma.clientProfile.findUnique({
+    const existingPhoneWithOtherService = await prisma.clientProfile.findFirst({
       where: {
-        telCellulaire_serviceType: {
-          telCellulaire: validatedData.telCellulaire,
-          serviceType: otherServiceType
-        }
+        telCellulaire: validatedData.telCellulaire,
+        serviceType: otherServiceType
       }
     });
 
